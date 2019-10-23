@@ -16,6 +16,12 @@
 
 # RStudio files
 .Rproj.user/
+*.Rproj
+
+#Ignore these file types
+.csv
+.docx
+.xlsx
 
 # produced vignettes
 vignettes/*.html
