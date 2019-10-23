@@ -2,6 +2,10 @@
 .Rhistory
 .Rapp.history
 
+# Folders
+
+data/
+
 # Session Data files
 .RData
 
@@ -18,8 +22,9 @@
 .Rproj.user/
 *.Rproj
 
+
 #Ignore these file types
-.csv
+*.csv
 .docx
 .xlsx
 

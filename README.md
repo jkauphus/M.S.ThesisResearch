@@ -6,7 +6,9 @@ Habitat Selection by Cottonmouths (Agkistrodon piscivorus) in Middle Tennessee.
 
 Many snake species exhibit an ontogenetic shift in habitat preferences, as this can potentially reduce interspecific competition. We investigated the habitat selection of a Tennessee population of cottonmouths inhabiting an isolated wetland system adjacent to the Cumberland River. Field collection was by visual-encounter surveys, and individuals were measured and sexed. Principle component analysis was used to elucidate intraspecific trends in habitat selection between male, female, and juvenile cottonmouths (N = 151). We found that cottonmouths exhibited non-random habitat use, with respect to available habitat features, and there were significant habitat differences among intraspecific groups. The results suggest that cottonmouths do change habitat use through ontogeny as from drier habitats to wetter habitats. This may be a mechanism to reduce intraspecific competition. However, among the cottonmouths each group (male, female, and juvenile) had large variations in habitat use, emphasizing that they are habitat generalists utilizing a wide variety of resources. In addition, the results showed females and juveniles had the highest variations in habitat preferences compared to males. We suggest that trends in ontogenetic shifts in habitat use may be associated more with actively avoiding larger individuals, than specific differences in habitat preference.  
 
-#Link to:
+#Link to: 
+
+https://jkauphus.github.io/M.S.ThesisResearch
 
 #Repository Description:
 

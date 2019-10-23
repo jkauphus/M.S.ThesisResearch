@@ -1,0 +1,142 @@
+---
+title: "Habitat Selection by Cottonmouths (Agkistrodon piscivorus) in Middle Tennessee.- Preliminary Anlysis"
+author: "Jack Kauphusman"
+date: "10/23/2019"
+output: 
+  html_notebook:
+    df_print: paged
+    rows.print: 10
+    theme: cosmo
+    highlight: breezedark
+    number_sections: yes
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+  pdf_document: default
+editor_options: 
+  chunk_output_type: inline
+---
+<style type="text/css">
+
+h1.title {
+  font-size: 40px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+  text-align: center;
+}
+h4.author { /* Header 4 - and the author and data headers use this too  */
+  font-size: 20px;
+  font-family: "Times New Roman", Times, serif;
+  color: DarkBlue;
+  text-align: center;
+}
+</style>
+---
+
+
+```{r Library, include=FALSE}
+library("dplyr")
+library("ggplot2")
+library("factoextra")
+library("FactoMineR")
+library("tidyr")
+library("knitr")
+library("gridExtra")
+library(lattice)
+library(permute)
+library(vegan)
+library(RVAideMemoire)
+library(MASS)
+library(caret)
+```
+
+# Multivariate Analysis
+
+Principal component analysis was used to assess the relationship of the continuous habitat variables that explain the relationship between cottonmouth habitat selected compared to general habitat available to the cottonmouth, and habitat selection differences within cottonmouth groups (males, females, juveniles, and  yoy). Permanova was used to evaluate the PCA to identify differences among ellipses if there were differences present within the groups.
+
+# PCA1 Analysis
+
+**Cottonmouth habitat compared to general available habitat.**
+
+```{r Snake Vs. Random PCA, include=FALSE}
+s<-read.csv("data/RegressionTree.csv")
+s<-na.omit(s)
+s<-s[,c(1:24)]
+glimpse(s)
+
+#Running PC with Whole DataSet
+pc<-PCA(s[,1:24], quali.sup = 1, scale.unit = T)
+```
+ 
+```{r Variable Contribution for PCA1, fig.width= 10}
+a<-fviz_contrib(pc, choice = "var", axes = 1, )
+b<-fviz_contrib(pc, choice = "var", axes = 2)
+grid.arrange(a,b, ncol = 2)
+```
+**Figure 1**: Variable contribution for the suite of habitat variables measured for PCA1. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
+
+```{r PCA1 , echo=TRUE}
+fviz_pca_biplot(pc, col.ind = s$Type, palette = c("Blue", "Red"), legend.title = "Type",label = "var",col.var = "black",select.var = list(cos2=0.5), addEllipses = T,repel = T,ggtheme = theme_bw())
+```
+**Figure 2**: The Principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured.
+
+## PERMANOVA for PCA1
+
+**PERMANOVA** -is used to compare groups of objects and test the null hypothesis that the centroids and dispersion of the groups as defined by measure space are equivalent for all groups. A rejection of the null hypothesis means that either the centroid and/or the spread of the objects is different between the groups.
+
+```{r PERMANOVA Test}
+# SCALING
+s_c <- scale(s[ ,2:24])
+
+# PerMANOVA - partitioning the euclidean distance matrix by Group followed by a pairwise comparison of the Random and Snake
+adonis(dist(s_c)~ Type, data = s, method='eu')
+pairwise.perm.manova(dist(s_c, "euclidean"), s$Type, nperm = 999, test = "Hotelling-Lawley")
+
+#PERMDISP
+dist<-dist(s_c)
+bd<-betadisper(dist,s$Type)
+bd 
+permutest(bd) 
+```
+
+# PCA2 Analysis
+
+Principal component analysis was used to assess the relationship of the continuous habitat variables that explain the relationship among the cottonmouth habitat selected within groups (Males, Females, Juveniles, YOY).
+
+```{r PCA, include=FALSE}
+s<-read.csv("data/Cottonmouth10-10_SVL.csv")
+s<-s[,c(2,6:28)]
+s<-na.omit(s)
+
+pc<-PCA(s[,1:24], quali.sup = 1, scale.unit = T)
+```
+
+```{r Contributing variables, fig.width= 10}
+a1<-fviz_contrib(pc, choice = "var", axes = 1)
+b1<-fviz_contrib(pc, choice = "var", axes = 2)
+grid.arrange(a1,b1, ncol = 2)
+```
+**Figure 3**: Variable contribution for the suite of habitat variables measured for PCA2. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
+
+```{r PCA 2}
+fviz_pca_biplot(pc, col.ind = s$Type, palette = "jco", label = "var", col.var = "black",select.var = list(cos2=0.5),legend.title = "Group", addEllipses = T,repel = T,ggtheme = theme_bw())
+```
+**Figure 4** Principal component analysis of the relationship of the habitat variables among the cottonmouth groups (Female, Juvenile, Male, & YOY). (YOY = young of the year). 
+
+## PERMANOVA for PCA2
+
+```{r}
+# SCALING
+s_c <- scale(s[ ,2:24])
+
+# PerMANOVA - partitioning the euclidean distance matrix by Group followed by a pairwise comparison of the Random and Snake
+adonis(dist(s_c)~ Type, data = s, method='eu')
+pairwise.perm.manova(dist(s_c, "euclidean"), s$Type, nperm = 999, test = "Hotelling-Lawley")
+
+#PERMDISP
+dist<-dist(s_c)
+bd<-betadisper(dist,s$Type)
+bd
+permutest(bd) 
+```
