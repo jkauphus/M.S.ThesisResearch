@@ -76,8 +76,9 @@ grid.arrange(a,b, ncol = 2)
 ```
 **Figure 1**: Variable contribution for the suite of habitat variables measured for PCA1. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
 
-```{r PCA1 , echo=TRUE}
-fviz_pca_biplot(pc, col.ind = s$Type, palette = c("Blue", "Red"), legend.title = "Type",label = "var",col.var = "black",select.var = list(cos2=0.5), addEllipses = T,repel = T,ggtheme = theme_bw())
+```{r PCA1, echo=TRUE}
+x<-fviz_pca_biplot(pc, col.ind = s$Type, palette = c("Blue", "Red"), legend.title = "Type",label = "var",col.var = "black",select.var = list(cos2=0.5), addEllipses = T,repel = T,ggtheme = theme_bw())
+x
 ```
 **Figure 2**: The Principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured.
 
