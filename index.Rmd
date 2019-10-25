@@ -51,11 +51,27 @@ library(MASS)
 library(caret)
 ```
 
-# Multivariate Analysis
+# Methodology
 
-Principal component analysis was used to assess the relationship of the continuous habitat variables that explain the relationship between cottonmouth habitat selected compared to general habitat available to the cottonmouth, and habitat selection differences within cottonmouth groups (males, females, juveniles, and  yoy). Permanova was used to evaluate the PCA to identify differences among ellipses if there were differences present within the groups.
+## Multivariate Analysis
 
-# PCA1 Analysis
+Principal component analysis was used to visually assess the relationship of the continuous habitat variables that explain the relationship between cottonmouth habitat selected compared to general habitat available to the cottonmouth. PERMANOVA followed by a PERMDISP statistical analyses were used to identify if there was a significant difference between cottonmouth habitat selected compared to general habitat available to the cottonmouth habitat. PERMANOVA is a statistical test used to idenify differences in multivariate space by assessing centroid distance, relative dispersion, or both. PERMDISP is a test for differences in multivariate dispersion, and is used to identify if dispersion is a component to the significance of a PERMANOVA.
+
+To assess the relationship of habitat selection differences among cottonmouth groups; Males, Females, Juveniles, and young of the year (YOY) similar analysis of PCA and PERMANOVA/PERMDISP were performed. Following PERMANOVA/PERMDISP, a pairwise comparision was used to identify differences between each group.
+
+##Linear Regression 
+
+Linear regression analysis was used to compare principal component 1 of PCA 2 with cottonmouth snout-vent length (SVL) to identify if there was a presence of an ontogenetic shift in habitat selection. 
+
+## Random Forest 
+
+**For future analysis!!**
+
+# Results
+
+##Multivariate Analysis
+
+## PCA 1
 
 **Cottonmouth habitat compared to general available habitat.**
 
@@ -74,34 +90,32 @@ a<-fviz_contrib(pc, choice = "var", axes = 1, )
 b<-fviz_contrib(pc, choice = "var", axes = 2)
 grid.arrange(a,b, ncol = 2)
 ```
-**Figure 1**: Variable contribution for the suite of habitat variables measured for PCA1. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
+**Figure 1:**: Variable contribution for the suite of habitat variables measured for PCA1. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
 
 ```{r PCA1, echo=TRUE}
 x<-fviz_pca_biplot(pc, col.ind = s$Type, palette = c("Blue", "Red"), legend.title = "Type",label = "var",col.var = "black",select.var = list(cos2=0.5), addEllipses = T,repel = T,ggtheme = theme_bw())
 x
 ```
-**Figure 2**: The Principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured.
+**Figure 2:**: The Principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured.
 
-## PERMANOVA for PCA1
+## PERMANOVA 1
 
-**PERMANOVA** -is used to compare groups of objects and test the null hypothesis that the centroids and dispersion of the groups as defined by measure space are equivalent for all groups. A rejection of the null hypothesis means that either the centroid and/or the spread of the objects is different between the groups.
 
 ```{r PERMANOVA Test}
-# SCALING
-s_c <- scale(s[ ,2:24])
-
-# PerMANOVA - partitioning the euclidean distance matrix by Group followed by a pairwise comparison of the Random and Snake
-adonis(dist(s_c)~ Type, data = s, method='eu')
-pairwise.perm.manova(dist(s_c, "euclidean"), s$Type, nperm = 999, test = "Hotelling-Lawley")
-
-#PERMDISP
-dist<-dist(s_c)
-bd<-betadisper(dist,s$Type)
-bd 
-permutest(bd) 
+adonis(s[,2:24]~ Type, data = s, method='eu')
 ```
 
-# PCA2 Analysis
+## PERMDISP 1
+
+PERMDISP is a test for PERMANOVA to check if there is heterogeneity of dispersion between groups.
+```{r Permadisp}
+#PERMDISP
+dist<-vegdist(s[,2:24])
+bd<-anova(betadisper(dist,s$Type))
+bd #Does not meet the assumption of homogeneity of multivariate dispersion there its heterogeneity of multivariate dispersion.
+```
+
+## PCA 2 
 
 Principal component analysis was used to assess the relationship of the continuous habitat variables that explain the relationship among the cottonmouth habitat selected within groups (Males, Females, Juveniles, YOY).
 
@@ -109,7 +123,6 @@ Principal component analysis was used to assess the relationship of the continuo
 s<-read.csv("data/Cottonmouth10-10_SVL.csv")
 s<-s[,c(2,6:28)]
 s<-na.omit(s)
-
 pc<-PCA(s[,1:24], quali.sup = 1, scale.unit = T)
 ```
 
@@ -118,26 +131,66 @@ a1<-fviz_contrib(pc, choice = "var", axes = 1)
 b1<-fviz_contrib(pc, choice = "var", axes = 2)
 grid.arrange(a1,b1, ncol = 2)
 ```
-**Figure 3**: Variable contribution for the suite of habitat variables measured for PCA2. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
+**Figure 3:**: Variable contribution for the suite of habitat variables measured for PCA2. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
 
 ```{r PCA 2}
 fviz_pca_biplot(pc, col.ind = s$Type, palette = "jco", label = "var", col.var = "black",select.var = list(cos2=0.5),legend.title = "Group", addEllipses = T,repel = T,ggtheme = theme_bw())
 ```
-**Figure 4** Principal component analysis of the relationship of the habitat variables among the cottonmouth groups (Female, Juvenile, Male, & YOY). (YOY = young of the year). 
+**Figure 4:** Principal component analysis of the relationship of the habitat variables among the cottonmouth groups (Female, Juvenile, Male, & YOY). (YOY = young of the year). 
 
-## PERMANOVA for PCA2
+## PERMANOVA 2
 
-```{r}
-# SCALING
-s_c <- scale(s[ ,2:24])
-
-# PerMANOVA - partitioning the euclidean distance matrix by Group followed by a pairwise comparison of the Random and Snake
-adonis(dist(s_c)~ Type, data = s, method='eu')
-pairwise.perm.manova(dist(s_c, "euclidean"), s$Type, nperm = 999, test = "Hotelling-Lawley")
-
-#PERMDISP
-dist<-dist(s_c)
-bd<-betadisper(dist,s$Type)
-bd
-permutest(bd) 
+```{r PERMANOVA 2, echo=TRUE}
+adonis(s[,2:24]~ Type, data = s, method='eu')
 ```
+
+## PERMDISP 2
+```{r PERMDISP 2}
+dist<-vegdist(s[,2:24])
+bd<-anova(betadisper(dist,s$Type))
+bd
+```
+
+## Pairwise Analysis 2
+```{r Pairwise comparision within groups}
+pairwise.perm.manova(vegdist(s[,2:24]), s$Type, nperm = 999, test = "Hotelling-Lawley")
+```
+## Linear Regression
+
+
+```{r Regression Line, echo=FALSE}
+s1<-read.csv("data/Cottonmouth10-10_SVL.csv")
+s1<-na.omit(s1)
+pc2<- princomp(s[,-1], cor = T, scores = T)
+PCA2<-cbind(s1, pc2$scores[,1:3])
+lm<-lm(SVL~Comp.1, PCA2)
+summary(lm)
+
+ggplot(PCA2, aes(x= SVL, y= Comp.1))+
+  geom_point(size = 2)+
+  xlim(209, 1061)+
+  geom_smooth(method = "lm", color= "black")+
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_vline(xintercept = 600, lty = 2)+
+  theme_bw(base_size = 24)+
+  geom_text(aes(260, -3, label = paste("R^2 = 0.071 ")), color="black")+
+  geom_text(aes(240, -3.6, label = paste("p < 0.01")), color = "black")+
+  xlab("Snout-vent length (mm)")+
+  ylab("Dim1 (20.3%)")
+
+```
+**Figure 5:** Comparision of princical component 1 of PCA 2 with SVL. 
+
+# References:
+
+**FactoMiner & FactoExtra** 
+
+Kassambara, A. 2017. Practical Guide to Principal Component Methods in R. STHDA.
+
+**randomForest & randomForestExplainer** 
+
+Breiman, L. & Cutler, A. 2018. Breiman and Cutler's Random Forests for Classification and Regression. CRAN.
+
+**vegan**
+
+Oksanen, J., Guillaume Blanchet, F., Kindt, R., Legendre, P., McGlinn, D., Minchin, P., O'Hara, R.B., Simpson, G., Solymos, P., Henry, M., Stevens, H., Szoecs, E., Wagner, H. 2019. Community Ecology Package. CRAN.
