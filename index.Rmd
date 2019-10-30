@@ -49,27 +49,92 @@ library(vegan)
 library(RVAideMemoire)
 library(MASS)
 library(caret)
+library(tmap)
+library(tmaptools)
+library("ggsn")
+library("leaflet")
+library("mapdata")
+library("maptools")
+library("rgdal")
+library("smoothr")
+library("sf")
+library("sp")
+library("tidyverse")
+library(gridExtra)
 ```
 
 # Methodology
 
-## Multivariate Analysis
+## Study Area 
 
-Principal component analysis was used to visually assess the relationship of the continuous habitat variables that explain the relationship between cottonmouth habitat selected compared to general habitat available to the cottonmouth. PERMANOVA followed by a PERMDISP statistical analyses were used to identify if there was a significant difference between cottonmouth habitat selected compared to general habitat available to the cottonmouth habitat. PERMANOVA is a statistical test used to idenify differences in multivariate space by assessing centroid distance, relative dispersion, or both. PERMDISP is a test for differences in multivariate dispersion, and is used to identify if dispersion is a component to the significance of a PERMANOVA.
+Data was collected along the Cumberland River Bicentennial Trail (CRBT), Cheatham County, Tennessee, USA (36˚17’ N, 87˚05’W). A boundary of an 115ha area was constructed using ArcMap (ESRI Products) to be used as the focal study area and the habitats within to be assessed. The trail was included within the boundary and divided the mixed lowland forest and slough wetlands from the upland limestone bluffs and rocky outcrops. Cottonmouths used the upland forest and limestone bluffs as overwintering sites and occupied the lowland forest slough during the active season. The landscape features that bordered the study area were the limestone bluffs and backwater streams along the northern portions, the Cumberland River along the west and south, and crop fields and urban development along the southern portions. These landscape features appeared to isolate this population of cottonmouths from dispersal. Unpublished telemetry data (Smith 2009) noted that snakes did not leave the study area, however, an adult male was observed attempting to cross a road toward the Cumberland River but was unfortunately killed by a passing vehicle.  
 
-To assess the relationship of habitat selection differences among cottonmouth groups; Males, Females, Juveniles, and young of the year (YOY) similar analysis of PCA and PERMANOVA/PERMDISP were performed. Following PERMANOVA/PERMDISP, a pairwise comparision was used to identify differences between each group.
+The habitat types found within the study area are the buttonbush slough in the central portion (xx ha), characterized by relatively open canopy, deeper water (50-150 cm), and mats of floating vegetation (Hydrocotyle ranunculoides & Ludwigia palustris) scattered throughout the slough. An open water habitat (> 100cm) is located toward the western portion of the study area. The seasonally flooded lowland forest (xx ha), dominated by red maples (Acer rubrum), has the denser canopy closure for the wetland, and is located between the slough and upland forest. Toward the southern portion between the slough and crop fields is a transitional edge area (xx ha) dominated by dense grass vegetation and occasionally floods (<10cm) in some portions throughout the year.  The upland forest habitat (xx ha) was dominated by oak trees (Quercus sp.) and had dense canopy closure and higher percentage of bare soil. Three main streams flow into the slough from the upland forest and provide a permanent source of water to the slough, along with periodic flooding from the Cumberland River, and groundwater seepage. A constructed levee divides the slough from adjacent crop fields, and during the fall waterfowl hunt, a culvert is opened from the levee to reduce the flooded areas.  
 
-##Linear Regression 
+```{r Field Map}
+#Outmap
+state <- map_data("state")
+county <- map_data("county")
+study_site <- data.frame("x" = -87.092447, "y" = 36.288684)
+tn <- county %>% 
+  filter(region=="tennessee")
 
-Linear regression analysis was used to compare principal component 1 of PCA 2 with cottonmouth snout-vent length (SVL) to identify if there was a presence of an ontogenetic shift in habitat selection. 
+Cheatham <- county %>% 
+  filter(region=="tennessee") %>% 
+  filter(subregion=="cheatham")
 
-## Random Forest 
+ggplot() + geom_polygon(data = state, aes(x=long, y = lat, group = group),
+                        fill = "white", color="black") + 
+           geom_polygon(data = tn, aes(x=long, y = lat, group = group),
+                        fill = "gray", color="black") + 
+           geom_polygon(data = Cheatham, aes(x=long, y = lat, group = group),
+                        fill = "yellow", color="black") + 
+           geom_point(data = study_site, aes(x=x,y=y), color="black") +
+  coord_fixed(xlim = c(-91, -81),  ylim = c(34, 37), ratio = 1.2) + 
+  xlab("Longitude") + ylab("Latitude") + ggtitle("Study Site, Cheatham Co., TN")
 
-**For future analysis!!**
+```
+Map 1: The location of the study site along a swamp adjacent to The Cumberland River Bicentennial Trail, Cheatham County, TN, USA.
+```{r Study Site}
+#Shapefiles
+generalhab<-st_read("data/Habitat/GENERALHABITAT.shp")
+Boundary<-st_read("data/Habitat/GENRLHABI.shp")
+cottonmouths<-st_read("data/Habitat/Cottonmouths.shp")
+
+a<-tmap_mode("view")+
+tm_shape(Boundary)+
+  tm_borders(col= "red", lwd = 1)+
+  tm_shape(cottonmouths)+
+  tm_dots(col = "yellow", size = 0.05, id = "NAME", text = "Cottonmouth location")+
+  tm_scale_bar()+
+  tm_layout("Study Site", legend.show = T)+
+  tm_basemap(leaflet::providers$Esri.WorldImagery)
+
+a
+```
+Map 2: The study area along the Cumberland River Bicentennial Trail, Cheatham County, TN. The boundary line where collection takes place is colored in red, and the cottonmouth locations were symbolized as yellow points. 
+
+
+
+## Field Collection 
+
+Visual encounter surveys occurred during the active seasons (May – October) of 2012, 2013, and 2019. Snakes were captured using snake tongs and retained in plastic restraining tubes (Midwest Tongs).  For individual identification, each snake was implanted subcutaneously with a Passive Integrated Transponder (PIT) tag (Biomark) on the posterior to the ventral side of the midbody. Tags and implant syringes were soaked in Benzalkonium Chloride (Benz-all) for 2 – 3 minutes prior to tag implantation, and an antiseptic liquid bandage (Vetclose) was applied to the insertion area to facilitate healing. Snout-vent length (SVL) and tail lengths (TL) were measured, and snakes were sexed by either everting hemipenes or by probing (Blanchard, F and Finister, E 1933) Individuals were considered juveniles if their SVL was between 500 - 300mm (Burkett, Ray 1966, Eskew et al. 2009), and young of the year (YOY) were considered to be individuals less than 300mm SVL (Koons et al. 2009). Body mass was measured with either a spring scale (Pesola) in the field, or by digital balance (Ohaus) in the lab. 
+
+Habitat selection was quantified by recording a suite of biotic and abiotic environmental variables (Table 1) from the location an individual was located prior to capture. A 1-m2 quadrat was used as the scale at which habitat variables were measured. To assess the microhabitats available to the population within the study site to those habitat variables being selected by cottonmouths, a combination of random and fixed sites (habitat sites) were measured. A randomly chosen comparison site was paired with each snake location, and sites were selected by using the random points tool in ArcMap within the boundary area. Fixed sites were placed 200-m in relation to one another within the boundary area, using the Fishnet tool in ArcMap, to assure all available habitats were quantified. 
+
+## Multivariate Analysis 
+
+To test that cottonmouth habitat selected was different then general habitat available a Permutational Multivariate Analysis of Variance (PERMANOVA) on Euclidean distance was performed (Anderson 2017). PERMANOVA tests for discrimination of groups within multivariate space, and a significant p-value (<0.05) indicates that groups differ due to their distances between centroid locations, their relative dispersion, or both (Anderson 2017). The advantages of PERMANOVA are that it does not assume normality and homogeneity of variance (Delgado-Baquerizo et al. 2015). Permutational analysis of multivariate dispersion (PERMDISP) tests for homogeneity of multivariate dispersion among groups, and is used to distinguish if dispersion is causing a significant PERMANOVA(Assis et al. 2013, Anderson 2017, Brückner and Heethoff 2017). A significant p-value from PERMDISP indicates that multivariate dispersion is heterogeneous between groups (Anderson 2017). PERMANOVA/PERMDISP were computed in R using the vegan package (Oksanen et al. 2019). To visualize the differences between cottonmouth habitat and general habitat, and aid in interpretation of the PERMANOVA/PERMDISP results, a Principal Component Analysis (PCA) on correlations was used. PCA helps to reduce dimensionality of a large dataset by extracting the most contributing variables that explain the variation within each dimension, and rank components based on explained variance (Peres-Neto et al. 2003). Prior to PCA, habitat variables were scaled (Kassambara 2017), and the first two components were retained for better visual representation. PCA was performed using the R packages FactoMiner and FactoExtra (Kassambara 2017).  
+
+To test for habitat selection differences between cottonmouth groups (Males, Females, Juveniles and YOY) PERMANOVA/PERMDISP and PCA were used. A pairwise comparison of PERMANOVA was used to identify differences between each group (Herve 2019). To evaluate the presence of an ontogenetic difference in overall habitat use among cottonmouths, linear regression was used to compare snake SVL and principal component one, similar to Eskew et al. 2009. 
+
+## Random Forest  
+
+Random forest (RF) classification approach (Breiman 2001) was used to identify the important habitat variables that discriminate between cottonmouth selected habitat and general habitat available. RF is a nonparametric classification method that builds an ensemble of thousands of classification trees from predictive variables and optimizes the accuracy of each tree. For each tree, a bootstrap sample of approximately 64% (i.e., bag sample) is used as a training set, and the remaining data left out is used as a validation set (i.e., out-of-bag [OOB]) to the finished tree as a cross-validation method (Breiman 2001, Severson et al. 2017). RF uses all trees to predict and estimate the overall OOB error rate. RF classifiers are resistant to collinearity of covariates, do not assume independence of samples, model nonlinear relationships, and are known to be more accurate models with ecological data compared to general statistical (ex: logistical regression) (Breiman 2001, Cutler et al. 2007, Severson et al. 2017).  However, multi-collinearity can reduce interpretations of results (Murphy et al. 2010). Before model construction, multi-collinearity in the predictors were assessed using qr matrix decomposition (threshold = 0.05) using the rfUtilities package (Evans and Murphy 2019). Using the randomForest function, from the randomForest package (Breiman et al. 2018), 1,000 classification trees were applied to each model. To construct an optimal model classifying cottonmouth and general habitat from the collected habitat variables, 30 iterations of a 10-fold cross-validation training set were ran, and a mean RF model was calculated. The cross-validation test set was then used to calculate a mean error rate and identify a minimal error rate model (Severson et al. 2017). The minimal error rate model was used to calculate relative importance and create partial dependence plots of the top 4 most contributing predictive habitat variables used to discriminate groups in the final model. 
 
 # Results
 
-##Multivariate Analysis
+## Multivariate Analysis
 
 ## PCA 1
 
