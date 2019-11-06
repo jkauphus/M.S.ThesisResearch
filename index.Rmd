@@ -65,7 +65,13 @@ library("sf")
 library("sp")
 library(ggmap)
 library("tidyverse")
-library(gridExtra)
+library("randomForest")
+library("randomForestExplainer")
+library("rfUtilities")
+library(faraway)
+library(ROCR)
+library(formattable)
+library(kableExtra)
 ```
 
 # Methodology
@@ -155,28 +161,43 @@ Random forest (RF) classification approach (Breiman 2001) was used to identify t
 
 # Results
 
-## Multivariate Analysis
+## Multivariate Analysis of Cottonmouth habitat compared to general available habitat.
 
-## PCA 1
-
-**Cottonmouth habitat compared to general available habitat.**
 
 ```{r Snake Vs. Random PCA, include=FALSE}
 s<-read.csv("data/RegressionTree.csv")
 s<-na.omit(s)
 s<-s[,c(1:24)]
-glimpse(s)
+```
 
+```{r PERMANOVA & PERMDISP Tests}
+#PERMANOVA
+Perm1<-adonis(s[,2:24]~ Type, data = s, method='eu')
+Perm1<-cbind(Perm1$aov.tab[1,4], Perm1$aov.tab[1,6])
+
+#PERMDISP
+dist<-vegdist(s[,2:24])
+bd<-anova(betadisper(dist,s$Type))
+bd1<-cbind(bd$`F value`, bd$`Pr(>F)`)
+bd1<-data.frame(bd1)
+bd1<-bd1[-2,]
+
+PermDisp<- cbind(Perm1, bd1)
+names(PermDisp)<-c("Pseudo-F", "P", "F", "P ")
+row.names(PermDisp)<-c("Proportions (Euclidean)")
+
+kable(PermDisp, caption = "Table 1: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.")%>%
+  kable_styling(c("striped", "bordered"))%>%
+  add_header_above(c(" " = 1, "PERMANOVA" = 2, "PERMDISP" = 2))%>%
+  footnote(general = "N(permutations) = 999; df = 1")
+
+```
+
+
+```{r include=FALSE}
 #Running PC with Whole DataSet
 pc<-PCA(s[,1:24], quali.sup = 1, scale.unit = T)
 ```
- 
-```{r Variable Contribution for PCA1, fig.width= 10}
-a<-fviz_contrib(pc, choice = "var", axes = 1, )
-b<-fviz_contrib(pc, choice = "var", axes = 2)
-grid.arrange(a,b, ncol = 2)
-```
-**Figure 1:**: Variable contribution for the suite of habitat variables measured for PCA1. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
 
 ```{r PCA1, echo=TRUE}
 x<-fviz_pca_biplot(pc, col.ind = s$Type, palette = c("Blue", "Red"), legend.title = "Type",label = "var",col.var = "black",select.var = list(cos2=0.5), addEllipses = T,repel = T,ggtheme = theme_bw())
@@ -184,65 +205,57 @@ x
 ```
 **Figure 2:**: The Principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured.
 
-## PERMANOVA 1
-
-
-```{r PERMANOVA Test}
-adonis(s[,2:24]~ Type, data = s, method='eu')
-```
-
-## PERMDISP 1
-
-PERMDISP is a test for PERMANOVA to check if there is heterogeneity of dispersion between groups.
-```{r Permadisp}
-#PERMDISP
-dist<-vegdist(s[,2:24])
-bd<-anova(betadisper(dist,s$Type))
-bd #Does not meet the assumption of homogeneity of multivariate dispersion there its heterogeneity of multivariate dispersion.
-```
-
-## PCA 2 
-
-Principal component analysis was used to assess the relationship of the continuous habitat variables that explain the relationship among the cottonmouth habitat selected within groups (Males, Females, Juveniles, YOY).
+## Multivariate Analysis Comparing Cottonmouth Groups
 
 ```{r PCA, include=FALSE}
 s<-read.csv("data/Cottonmouth10-10_SVL.csv")
 s<-s[,c(2,6:28)]
 s<-na.omit(s)
-pc<-PCA(s[,1:24], quali.sup = 1, scale.unit = T)
 ```
 
-```{r Contributing variables, fig.width= 10}
-a1<-fviz_contrib(pc, choice = "var", axes = 1)
-b1<-fviz_contrib(pc, choice = "var", axes = 2)
-grid.arrange(a1,b1, ncol = 2)
+```{r PERMANOVA 2, fig.width= 12, echo=TRUE}
+#PERMANOVA
+Perm2<-adonis(s[,2:24]~ Type, data = s, method='eu')
+Perm2<-cbind(Perm2$aov.tab[1,4], Perm2$aov.tab[1,6])
+
+#PERMDISP 2
+dist<-vegdist(s[,2:24])
+bd2<-anova(betadisper(dist,s$Type))
+
+bd2<-cbind(bd2$`F value`, bd2$`Pr(>F)`)
+bd2<-data.frame(bd2)
+bd2<-bd2[-2,]
+
+#Pairwise using Hotelling-Lawley
+pairs<-pairwise.perm.manova(vegdist(s[,2:24]), s$Type, nperm = 999, test = "Hotelling-Lawley")
+pairs<-c(pairs$p.value[1,1],pairs$p.value[2,1],pairs$p.value[3,1], pairs$p.value[2,2], pairs$p.value[3,2], pairs$p.value[3,3])
+pairs<-t(data.frame(pairs))
+PermDisp<- cbind(Perm2, bd2)
+PermDisp<-cbind(PermDisp, pairs)
+names(PermDisp)<-c("Pseudo-F", "P", "F", "P ","Female/JUV", "Female/Male", "Female/YOY", "Male/JUV", "JUV/YOY", "Male/YOY")
+row.names(PermDisp)<-c("Proportions (Euclidean)")
+
+#Kable
+kable(PermDisp, digits = 3, caption = "Table 1: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing habitat selected differnces among the cottonmouth groups within the study area.")%>%
+  kable_styling(c("striped", "bordered"))%>%
+  add_header_above(c(" " = 1, "PERMANOVA" = 2, "PERMDISP" = 2, "Pairwise-Comparison" = 6))%>%
+  footnote(general = "N(permutations) = 999; df = 1",
+           "JUV = Juvenile",
+           "YOY = Young of the year")
 ```
-**Figure 3:**: Variable contribution for the suite of habitat variables measured for PCA2. On the left are the variables that contribute to dimension 1, and the right figure are the variables that contribute to dimension 2.
+
+## PCA 2 
+
+```{r include=FALSE}
+pc<-PCA(s[,1:24], quali.sup = 1, scale.unit = T)
+```
 
 ```{r PCA 2}
 fviz_pca_biplot(pc, col.ind = s$Type, palette = "jco", label = "var", col.var = "black",select.var = list(cos2=0.5),legend.title = "Group", addEllipses = T,repel = T,ggtheme = theme_bw())
 ```
 **Figure 4:** Principal component analysis of the relationship of the habitat variables among the cottonmouth groups (Female, Juvenile, Male, & YOY). (YOY = young of the year). 
 
-## PERMANOVA 2
-
-```{r PERMANOVA 2, echo=TRUE}
-adonis(s[,2:24]~ Type, data = s, method='eu')
-```
-
-## PERMDISP 2
-```{r PERMDISP 2}
-dist<-vegdist(s[,2:24])
-bd<-anova(betadisper(dist,s$Type))
-bd
-```
-
-## Pairwise Analysis 2
-```{r Pairwise comparision within groups}
-pairwise.perm.manova(vegdist(s[,2:24]), s$Type, nperm = 999, test = "Hotelling-Lawley")
-```
 ## Linear Regression
-
 
 ```{r Regression Line, echo=FALSE}
 s1<-read.csv("data/Cottonmouth10-10_SVL.csv")
@@ -265,7 +278,301 @@ ggplot(PCA2, aes(x= SVL, y= Comp.1))+
   ylab("Dim1 (20.3%)")
 
 ```
-**Figure 5:** Comparision of princical component 1 of PCA 2 with SVL. 
+**Figure 5:** Linear regression of Principal Component scores of PC-1 comparison of habitat selection among the cottonmouth groups (Males, Females, Juveniles, and YOY) and cottonmouth snout-vent lengths. 
+
+## Random Forest Model
+
+
+
+```{r randomForest, include=FALSE}
+#Loading data
+s<-read.csv("data/RegressionTree.csv")
+s<-na.omit(s)
+s<-s[,c(1:24)]
+head(s[1:5],)
+```
+
+## Multicollinearity with VIF
+```{r checking Multicolinearrity}
+
+#OR with VIF
+model<-lm(Substrate.Temp~., data = s[,-1])
+vif(model)
+
+#From the VIF the X.Land and X.Water have high degree of multicollinearity so I shall remove X.Land
+s<-s[,-19] #Removed X.Land
+model<-lm(Substrate.Temp~., data = s[,-1])
+vif(model)
+```
+
+```{r 10-Fold Cross Validation, echo=TRUE}
+set.seed(123)
+ind<-sample(2,nrow(s),replace = T, prob = c(0.9,0.1))
+train<-s[ind==1,]
+test<-s[ind==2,]
+```
+
+```{r 30 iterations, echo=TRUE}
+a1<- randomForest(Type~., data = train, ntree = 1000)
+a2<- randomForest(Type~., data = train, ntree = 1000)
+a3<- randomForest(Type~., data = train, ntree = 1000)
+a4<- randomForest(Type~., data = train, ntree = 1000)
+a5<- randomForest(Type~., data = train, ntree = 1000)
+a6<- randomForest(Type~., data = train, ntree = 1000)
+a7<- randomForest(Type~., data = train, ntree = 1000)
+a8<- randomForest(Type~., data = train, ntree = 1000)
+a9<- randomForest(Type~., data = train, ntree = 1000)
+a10<- randomForest(Type~., data = train, ntree = 1000)
+b1<- randomForest(Type~., data = train, ntree = 1000)
+b2<- randomForest(Type~., data = train, ntree = 1000)
+b3<- randomForest(Type~., data = train, ntree = 1000)
+b4<- randomForest(Type~., data = train, ntree = 1000)
+b5<- randomForest(Type~., data = train, ntree = 1000)
+b6<- randomForest(Type~., data = train, ntree = 1000)
+b7<- randomForest(Type~., data = train, ntree = 1000)
+b8<- randomForest(Type~., data = train, ntree = 1000)
+b9<- randomForest(Type~., data = train, ntree = 1000)
+b10<- randomForest(Type~., data = train, ntree = 1000)
+c1<- randomForest(Type~., data = train, ntree = 1000)
+c2<- randomForest(Type~., data = train, ntree = 1000)
+c3<- randomForest(Type~., data = train, ntree = 1000)
+c4<- randomForest(Type~., data = train, ntree = 1000)
+c5<- randomForest(Type~., data = train, ntree = 1000)
+c6<- randomForest(Type~., data = train, ntree = 1000)
+c7<- randomForest(Type~., data = train, ntree = 1000)
+c8<- randomForest(Type~., data = train, ntree = 1000)
+c9<- randomForest(Type~., data = train, ntree = 1000)
+c10<- randomForest(Type~., data = train, ntree = 1000)
+```
+
+```{r Out-of-Bag}
+OOB<-c(a1$err.rate[1000,1],a2$err.rate[1000,1],a3$err.rate[1000,1],a4$err.rate[1000,1],a5$err.rate[1000,1],a6$err.rate[1000,1],
+       a7$err.rate[1000,1],a8$err.rate[1000,1],a9$err.rate[1000,1],a10$err.rate[1000,1],b1$err.rate[1000,1],b2$err.rate[1000,1],
+       b3$err.rate[1000,1],b4$err.rate[1000,1],b5$err.rate[1000,1],b6$err.rate[1000,1],b7$err.rate[1000,1],b8$err.rate[1000,1],
+       b9$err.rate[1000,1],b10$err.rate[1000,1],c1$err.rate[1000,1],c2$err.rate[1000,1],c3$err.rate[1000,1],c4$err.rate[1000,1],
+       c5$err.rate[1000,1],c6$err.rate[1000,1],c7$err.rate[1000,1],c8$err.rate[1000,1],c9$err.rate[1000,1],c10$err.rate[1000,1])
+mean(OOB)
+min(OOB)
+max(OOB)
+
+OOB<-c(1-min(OOB),1-mean(OOB), 1-max(OOB))
+```
+
+```{r Cross Validation}
+p1<-predict(a1, test)
+cv1<-confusionMatrix(p1, test$Type)
+p2<-predict(a2, test)
+cv2<-confusionMatrix(p2, test$Type)
+p3<-predict(a3, test)
+cv3<-confusionMatrix(p3, test$Type)
+p4<-predict(a4, test)
+cv4<-confusionMatrix(p4, test$Type)
+p5<-predict(a5, test)
+cv5<-confusionMatrix(p5, test$Type)
+p6<-predict(a6, test)
+cv6<-confusionMatrix(p6, test$Type)
+p7<-predict(a7, test)
+cv7<-confusionMatrix(p7, test$Type)
+p8<-predict(a8, test)
+cv8<-confusionMatrix(p8, test$Type)
+p9<-predict(a9, test)
+cv9<-confusionMatrix(p9, test$Type)
+p10<-predict(a10, test)
+cv10<-confusionMatrix(p10, test$Type)
+p11<-predict(b1, test)
+cv11<-confusionMatrix(p11, test$Type)
+p12<-predict(b2, test)
+cv12<-confusionMatrix(p12, test$Type)
+p13<-predict(b3, test)
+cv13<-confusionMatrix(p13, test$Type)
+p14<-predict(b4, test)
+cv14<-confusionMatrix(p14, test$Type)
+p15<-predict(b5, test)
+cv15<-confusionMatrix(p15, test$Type)
+p16<-predict(b6, test)
+cv16<-confusionMatrix(p16, test$Type)
+p17<-predict(b7, test)
+cv17<-confusionMatrix(p17, test$Type)
+p18<-predict(b8, test)
+cv18<-confusionMatrix(p18, test$Type)
+p19<-predict(b9, test)
+cv19<-confusionMatrix(p19, test$Type)
+p20<-predict(b10, test)
+cv20<-confusionMatrix(p20, test$Type)
+p21<-predict(c1, test)
+cv21<-confusionMatrix(p21, test$Type)
+p22<-predict(c2, test)
+cv22<-confusionMatrix(p22, test$Type)
+p23<-predict(c3, test)
+cv23<-confusionMatrix(p23, test$Type)
+p24<-predict(c4, test)
+cv24<-confusionMatrix(p24, test$Type)
+p25<-predict(c5, test)
+cv25<-confusionMatrix(p25, test$Type)
+p26<-predict(c6, test)
+cv26<-confusionMatrix(p26, test$Type)
+p27<-predict(c7, test)
+cv27<-confusionMatrix(p27, test$Type)
+p28<-predict(c8, test)
+cv28<-confusionMatrix(p28, test$Type)
+p29<-predict(c9, test)
+cv29<-confusionMatrix(p29, test$Type)
+p30<-predict(c10, test)
+cv30<-confusionMatrix(p30, test$Type)
+#Creating CV Table
+CVTABLE<-t(data.frame(cv1$overall,cv2$overall,cv3$overall,cv4$overall,cv5$overall,cv6$overall,
+                        cv7$overall,cv8$overall,cv9$overall,cv10$overall,cv11$overall,cv12$overall,
+                        cv13$overall,cv14$overall,cv15$overall,cv16$overall,cv17$overall,cv18$overall,
+                        cv19$overall,cv20$overall,cv21$overall,cv22$overall,cv23$overall,cv24$overall,
+                        cv25$overall,cv26$overall,cv27$overall,cv28$overall,cv29$overall,cv30$overall))
+
+
+CV2TABLE<-t(data.frame(cv1$byClass,cv2$byClass,cv3$byClass,cv4$byClass,cv5$byClass,cv6$byClass,
+                        cv7$byClass,cv8$byClass,cv9$byClass,cv10$byClass,cv11$byClass,cv12$byClass,
+                        cv13$byClass,cv14$byClass,cv15$byClass,cv16$byClass,cv17$byClass,cv18$byClass,
+                        cv19$byClass,cv20$byClass,cv21$byClass,cv22$byClass,cv23$byClass,cv24$byClass,
+                        cv25$byClass,cv26$byClass,cv27$byClass,cv28$byClass,cv29$byClass,cv30$byClass))
+
+cv_table<-data.frame(CVTABLE,CV2TABLE)
+cv_table<-cv_table[,c(1,2,8,9)]
+
+max(cv_table[,1])
+mean(cv_table[,1])
+min(cv_table[,1])
+
+cv_table<-cv_table[c(3,4,30),]
+RandomForest_Model<-c("Maximum", "Mean", "Minimum")
+```
+```{r Calculating AUC}
+#Minimal Model AUC
+pred1<-predict(c10, test, type = "prob")
+pred1<-pred1[,2]
+pred1<-prediction(pred1, test$Type)
+
+#AUC (Area Under The Curve)
+auc1<-performance(pred1, "auc")
+auc1<-unlist(slot(auc1, "y.values"))
+min_auc<-round(auc1, 4)
+
+
+#Mean Model AUC
+pred1<-predict(a4, test, type = "prob")
+pred1<-pred1[,2]
+pred1<-prediction(pred1, test$Type)
+
+#AUC (Area Under The Curve)
+auc1<-performance(pred1, "auc")
+auc1<-unlist(slot(auc1, "y.values"))
+mean_auc<-round(auc1, 4)
+
+
+#Mean Model AUC
+pred1<-predict(a3, test, type = "prob")
+pred1<-pred1[,2]
+pred1<-prediction(pred1, test$Type)
+
+#AUC (Area Under The Curve)
+auc1<-performance(pred1, "auc")
+auc1<-unlist(slot(auc1, "y.values"))
+max_auc<-round(auc1, 4)
+
+AUC<-c(min_auc, mean_auc, max_auc)
+```
+
+```{r Table}
+models<-cbind(RandomForest_Model, cv_table, OOB, AUC)
+
+formattable(models, row.names = F, digits = 3, caption= 'Table 1: Performance metrics for the 30-iteration random forest model on cottonmouth habitat selection compared to general habitat available (OOB = Out of Bag accuracy rate, AUC = Area Under the Curve)', align = "l", col.names=c("Random Forest Model", "Accuracy", "Kappa", "Sensitivity", "Specificity", "OOB", "AUC"))
+```
+
+```{r Variable Importance, include=FALSE}
+#Maximal Model was a3 in the iterations, so I will now use that to create the partial - least square biplots of the top 4 most contributing variables,
+
+D<-varImpPlot(a3,            
+           sort = T,
+           n.var = 10, type = 2, plot = F)
+
+Habitat_Variables <- c("Substrate Temp","Surface Temp", "Ambient Temp","Cover Length", "Cover Width", "Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover", "Fallen Log Cover", "Woody Stem Diameter","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter", "Distance To Water", "Water Depth", "Percent Land", "Percent Water", "Percent Woody Debris", "Percent Debris", "Percent Floating Vegetation", "Percent Bare Soil")
+D<-cbind(Habitat_Variables,D[,1])
+D<-data.frame(D)
+names(D)<-c("Habitat Variables", "Mean Gini Index")
+D$`Mean Gini Index`<-as.numeric(D$`Mean Gini Index`)
+
+
+G<-ggplot(D, aes( x = reorder(`Habitat Variables`, `Mean Gini Index`), y=`Mean Gini Index`))+
+  geom_col(width = .4)+
+  ylim(0,25)+
+  coord_flip()+
+  xlab("Habitat Variables")+
+  ylab("Mean decrease in Gini")
+  
+
+#Partial Dependence Plot
+w<-partialPlot(a3, train, Dist..To.Water, "SNAKE", plot = F)
+x<-partialPlot(a3, train, Depth, "SNAKE", plot = F)
+y<-partialPlot(a3, train, X.Bare.soil, "SNAKE", plot = F)
+z<-partialPlot(a3, train, Surface.Temp, "SNAKE", plot =F)
+
+#Distance to Water
+w<-cbind(w$x,w$y)
+w<-data.frame(w)
+names(w)<-c("x","y")
+
+w1<-ggplot(data = w, aes(x,y))+
+  geom_line()+
+  xlab("Distance to Water (cm)")+
+  ylab("Relative probability")+
+  geom_text(aes(4500,0.35), label = paste("A"), col = "black")+
+  ylim(-0.5, 0.5)+
+  theme_bw()
+
+#Depth
+
+x<-cbind(x$x,x$y)
+x<-data.frame(x)
+names(x)<-c("x","y")
+
+x1<-ggplot(data = x, aes(x,y))+
+  geom_line()+
+  xlab("Depth (cm)")+
+  ylab("Relative probability")+
+  geom_text(aes(80,0.35), label = paste("B"), col = "black")+
+  theme_bw()
+#X. Bares Soil
+y<-cbind(y$x,y$y)
+y<-data.frame(y)
+names(y)<-c("x","y")
+
+y1<-ggplot(data = y, aes(x,y))+
+  geom_line()+
+  xlab("Bare Soil (%)")+
+  ylab("Relative probability")+
+  geom_text(aes(100,0.6), label = paste("C"), col = "black")+
+  theme_bw()
+
+z<-cbind(z$x,z$y)
+z<-data.frame(z)
+names(z)<-c("x","y")
+
+z1<-ggplot(data = z, aes(x,y))+
+  geom_line()+
+  xlab("Surface Temperature (°C)")+
+  ylab("Relative probability")+
+  geom_text(aes(37, 0.3), label = paste("D"), col = "black")+
+  theme_bw()
+```
+
+```{r Variable importance Plot}
+G
+```
+**Figure #:**The Mean decrease in Gini, a metric for variable importance, on the habitat variables from the Minimum Random Forest model of Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
+
+```{r Partial Dependance Plots}
+grid.arrange(w1,x1,y1,z1, ncol= 2)
+```
+**Figure #:** Partial dependance plots of the four most constributing variables (From mean decrease in gini) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Distance to water (A), water depth (B), percent bare soil (C), and surface temperature (D) were measured within a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
+
+# Discussion
 
 # References:
 
