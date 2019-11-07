@@ -74,7 +74,7 @@ library(formattable)
 library(kableExtra)
 ```
 
-# Methodology
+# Methods
 
 ## Study Area 
 
@@ -263,7 +263,6 @@ s1<-na.omit(s1)
 pc2<- princomp(s[,-1], cor = T, scores = T)
 PCA2<-cbind(s1, pc2$scores[,1:3])
 lm<-lm(SVL~Comp.1, PCA2)
-summary(lm)
 
 ggplot(PCA2, aes(x= SVL, y= Comp.1))+
   geom_point(size = 2)+
@@ -281,9 +280,6 @@ ggplot(PCA2, aes(x= SVL, y= Comp.1))+
 **Figure 5:** Linear regression of Principal Component scores of PC-1 comparison of habitat selection among the cottonmouth groups (Males, Females, Juveniles, and YOY) and cottonmouth snout-vent lengths. 
 
 ## Random Forest Model
-
-
-
 ```{r randomForest, include=FALSE}
 #Loading data
 s<-read.csv("data/RegressionTree.csv")
@@ -491,15 +487,12 @@ formattable(models, row.names = F, digits = 3, caption= 'Table 1: Performance me
 D<-varImpPlot(a3,            
            sort = T,
            n.var = 10, type = 2, plot = F)
+Gini<-D[,1]
+Gini<-data.frame(Gini)
+Habitat_Variables <- c("Substrate Temp","Surface Temp", "Ambient Temp","Cover Length", "Cover Width", "Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover", "Fallen Log Cover", "Woody Stem Diameter","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter", "Distance To Water", "Water Depth", "Percent Water", "Percent Woody Debris", "Percent Debris", "Percent Floating Vegetation", "Percent Bare Soil")
+D<-cbind(Habitat_Variables,Gini)
 
-Habitat_Variables <- c("Substrate Temp","Surface Temp", "Ambient Temp","Cover Length", "Cover Width", "Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover", "Fallen Log Cover", "Woody Stem Diameter","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter", "Distance To Water", "Water Depth", "Percent Land", "Percent Water", "Percent Woody Debris", "Percent Debris", "Percent Floating Vegetation", "Percent Bare Soil")
-D<-cbind(Habitat_Variables,D[,1])
-D<-data.frame(D)
-names(D)<-c("Habitat Variables", "Mean Gini Index")
-D$`Mean Gini Index`<-as.numeric(D$`Mean Gini Index`)
-
-
-G<-ggplot(D, aes( x = reorder(`Habitat Variables`, `Mean Gini Index`), y=`Mean Gini Index`))+
+G<-ggplot(D, aes( x = reorder(Habitat_Variables, Gini), y=Gini))+
   geom_col(width = .4)+
   ylim(0,25)+
   coord_flip()+
