@@ -277,7 +277,7 @@ names(PermDisp)<-c("Pseudo-F", "P", "F", "P ","Female/JUV", "Female/Male", "Fema
 row.names(PermDisp)<-c("Proportions (Euclidean)")
 
 #Kable
-kable(PermDisp, digits = 3, caption = "Table 1: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing habitat selected differnces among the cottonmouth groups within the study area.")%>%
+kable(PermDisp, digits = 3, caption = "Table 2: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing habitat selected differnces among the cottonmouth groups within the study area.")%>%
   kable_styling(c("striped", "bordered"))%>%
   add_header_above(c(" " = 1, "PERMANOVA" = 2, "PERMDISP" = 2, "Pairwise-Comparison" = 6))%>%
   footnote(general = "N(permutations) = 5000; df = 1",
@@ -299,7 +299,7 @@ var$contrib[,1:2]
 grid.arrange(x,y, ncol= 2)
 ```
 
-**Figure 3:** On the left, principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured. The variables with the highest contribution to Dim1 are Percent Land (19%) and Percent Water (19%). The highest contribution to Dim 2 are Ambient Temp (23%), Surface Temp (25%) and Substrate Temp(22%).On the right, principal component analysis on the relationship of the habitat variables among the cottonmouth groups (Female, Juvenile, Male, & YOY)(YOY = young of the year). The variables with the highest contribution were Percent Land (15.7%) and Percent Water (16.2%) in Dim 1, and Ambient Temp (21,4%), Surface Temp (24.2%) and Substrate Temp (16.5%) in Dim2. Ellipses represent 95% CI. 
+**Figure 1:** On the left, principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured. The variables with the highest contribution to Dim1 are Percent Land (19%) and Percent Water (19%). The highest contribution to Dim 2 are Ambient Temp (23%), Surface Temp (25%) and Substrate Temp(22%).On the right, principal component analysis on the relationship of the habitat variables among the cottonmouth groups (Female, Juvenile, Male, & YOY)(YOY = young of the year). The variables with the highest contribution were Percent Land (15.7%) and Percent Water (16.2%) in Dim 1, and Ambient Temp (21,4%), Surface Temp (24.2%) and Substrate Temp (16.5%) in Dim2. Ellipses represent 95% CI. 
 
 ## Linear Regression
 
@@ -325,7 +325,7 @@ ggplot(PCA2, aes(x= SVL, y= Comp.1))+
   geom_text(data = NULL, label = "Wetter", color= "blue", x =240, y= -4.85)
 
 ```
-**Figure 5:** Linear regression of Principal Component scores of PC-1 comparison of habitat selection among the cottonmouth groups (Males, Females, Juveniles, and YOY) and cottonmouth snout-vent lengths. 
+**Figure 2:** Linear regression of Principal Component scores of PC-1 comparison of habitat selection among the cottonmouth groups (Males, Females, Juveniles, and YOY) and cottonmouth snout-vent lengths. 
 
 ## Random Forest Model
 ```{r randomForest, include=FALSE}
@@ -525,7 +525,7 @@ AUC<-c(min_auc, mean_auc, max_auc)
 ```{r Table}
 models<-cbind(RandomForest_Model, cv_table, OOB, AUC)
 
-formattable(models, row.names = F, digits = 3, caption= 'Table 1: Performance metrics for the 30-iteration random forest model on cottonmouth habitat selection compared to general habitat available (OOB = Out of Bag accuracy rate, AUC = Area Under the Curve)', align = "l", col.names=c("Random Forest Model", "Accuracy", "Kappa", "Sensitivity", "Specificity", "OOB", "AUC"))
+formattable(models, row.names = F, digits = 3, caption= 'Table 3: Performance metrics for the 30-iteration random forest model on cottonmouth habitat selection compared to general habitat available (OOB = Out of Bag accuracy rate, AUC = Area Under the Curve)', align = "l", col.names=c("Random Forest Model", "Accuracy", "Kappa", "Sensitivity", "Specificity", "OOB", "AUC"))
 ```
 
 ```{r Variable Importance, include=FALSE}
@@ -606,12 +606,12 @@ z1<-ggplot(data = z, aes(x,y))+
 ```{r Variable importance Plot}
 G
 ```
-**Figure #:**The Mean decrease in Gini, a metric for variable importance, on the habitat variables from the Minimum Random Forest model of Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
+**Figure 2:**The Mean decrease in Gini, a metric for variable importance, on the habitat variables from the Minimum Random Forest model of Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
 
 ```{r Partial Dependance Plots}
 grid.arrange(x1,w1,y1,z1, ncol= 2)
 ```
-**Figure #:** Partial dependance plots of the four most constributing variables (From mean decrease in gini) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Distance to water (A), water depth (B), percent bare soil (C), and surface temperature (D) were measured within a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
+**Figure 3:** Partial dependance plots of the four most constributing variables (From mean decrease in gini) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Distance to water (A), water depth (B), percent bare soil (C), and surface temperature (D) were measured within a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
 
 # Discussion
 
