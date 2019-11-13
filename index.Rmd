@@ -223,7 +223,7 @@ Perm1<-adonis(s[,2:24]~ Type, data = s, method='eu')
 Perm1<-cbind(Perm1$aov.tab[1,4], Perm1$aov.tab[1,6])
 
 #PERMDISP
-dist<-vegdist(s[,2:24])
+dist<-dist(scale(s[,2:24]))
 bd<-anova(betadisper(dist,s$Type))
 bd1<-cbind(bd$`F value`, bd$`Pr(>F)`)
 bd1<-data.frame(bd1)
@@ -233,7 +233,7 @@ PermDisp<- cbind(Perm1, bd1)
 names(PermDisp)<-c("Pseudo-F", "P", "F", "P ")
 row.names(PermDisp)<-c("Proportions (Euclidean)")
 
-kable(PermDisp, digits = 3, caption = "Table 1: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.")%>%
+kable(PermDisp, digits = 4, caption = "Table 1: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.")%>%
   kable_styling(c("striped", "bordered"))%>%
   add_header_above(c(" " = 1, "PERMANOVA" = 2, "PERMDISP" = 2))%>%
   footnote(general = "N(permutations) = 999; df = 1")
@@ -265,12 +265,11 @@ Perm2<-adonis(s[,2:24]~ Type, data = s, method='eu')
 Perm2<-cbind(Perm2$aov.tab[1,4], Perm2$aov.tab[1,6])
 
 #PERMDISP 2
-dist<-vegdist(s[,2:24])
-bd2<-anova(betadisper(dist,s$Type))
-
-bd2<-cbind(bd2$`F value`, bd2$`Pr(>F)`)
-bd2<-data.frame(bd2)
-bd2<-bd2[-2,]
+dist<-dist(scale(s[,2:24]))
+bd<-anova(betadisper(dist,s$Type))
+bd1<-cbind(bd$`F value`, bd$`Pr(>F)`)
+bd1<-data.frame(bd1)
+bd1<-bd1[-2,]
 
 #Pairwise using Hotelling-Lawley
 
