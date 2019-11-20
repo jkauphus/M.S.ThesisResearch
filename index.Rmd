@@ -186,7 +186,6 @@ SVl.SD<- group_by(s, Type)%>%
   summarise(
     sd=sd(SVL, na.rm = T)
   )
-
 ```
 
 From May - October  of 2012, 2013, and 2019, we recorded habitat variables for `r Snake` cottonmouths and `r General` general habitat comparison sites. Of the cottonmouths that were captured, `r Male` were adult males, `r Female` adult females, `r Juvenile` juveniles, and `r YOY` YOY. Adult males averaged in **(744 +/-132)**mm in SVL, females **(620 +/- 60)**mm, juveniles **(408 +/- 55)**mm, and YOY **(251 +/- 24)**.  
@@ -233,104 +232,145 @@ PermDisp<- cbind(Perm1, bd1)
 names(PermDisp)<-c("Pseudo-F", "P", "F", "P ")
 row.names(PermDisp)<-c("Proportions (Euclidean)")
 
-kable(PermDisp, digits = 4, caption = "Table 1: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.")%>%
+PERM<- kable(PermDisp, digits = 4, caption = "Table 1: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.")%>%
   kable_styling(c("striped", "bordered"))%>%
   add_header_above(c(" " = 1, "PERMANOVA" = 2, "PERMDISP" = 2))%>%
   footnote(general = "N(permutations) = 999; df = 1")
 
+PERM
 ```
-```{r include=FALSE}
-#Running PC with Whole DataSet
-pc<-PCA(s[,1:23], quali.sup = 1, scale.unit = T)
-```
-
-```{r PCA1, include=FALSE}
-x<-fviz_pca_biplot(pc,col.ind = s$Type, palette = c("Blue", "Red"), legend.title = "Type",label = "var",col.var = "black",select.var = list(cos2=0.5), addEllipses = T,repel = T,ggtheme = theme_bw())+
-  ggtitle("General Vs. Cottonmouth Habitat")
-
-var<-get_pca_var(pc)
-var$contrib[,1:2]
-```
-
-```{r Perdataset groups, include=FALSE}
-s<-read.csv("data/snake.SVL.csv")
-s<-s[,c(2,6:28)]
+```{r Dataset PCA}
+#Uploading Data
+s<-read.csv("Data/CottonmouthTotal-11-18.csv")
+#s<-s[c(1:150),c(3:26)]
 s<-na.omit(s)
 ```
 
-```{r PERMANOVA 2, fig.width= 12, echo=TRUE}
-set.seed(123)
-#PERMANOVA
-Perm2<-adonis(s[,2:24]~ Type, data = s, method='eu')
-Perm2<-cbind(Perm2$aov.tab[1,4], Perm2$aov.tab[1,6])
 
-#PERMDISP 2
-dist<-dist(scale(s[,2:24]))
-bd<-anova(betadisper(dist,s$Type))
-bd1<-cbind(bd$`F value`, bd$`Pr(>F)`)
-bd1<-data.frame(bd1)
-bd1<-bd1[-2,]
+```{r PCA, fig.width=15, fig.height=10}
+#PCA
+s1<-s
 
-#Pairwise using Hotelling-Lawley
+pc<-princomp(s1[,3:25], cor = T, scores = T)
+summary(pc)
+#Component
+#Setting- Up ANOVA
+comp<-pc$scores[,1:3]
+s1<-cbind(s1, comp)
 
-pairs<-pairwise.perm.manova(vegdist(s[,2:24]), s$Type, nperm = 5000, test = "Hotelling-Lawley")
-pairs<-c(pairs$p.value[1,1],pairs$p.value[2,1],pairs$p.value[3,1], pairs$p.value[2,2], pairs$p.value[3,2], pairs$p.value[3,3])
-pairs<-t(data.frame(pairs))
-PermDisp<- cbind(Perm2, bd2)
-PermDisp<-cbind(PermDisp, pairs)
-names(PermDisp)<-c("Pseudo-F", "P", "F", "P ","Female/JUV", "Female/Male", "Female/YOY", "Male/JUV", "JUV/YOY", "Male/YOY")
-row.names(PermDisp)<-c("Proportions (Euclidean)")
+#Snake Averages
+s2<-s1[c(1:149),c(3:32)]
+pcomp<-group_by(s2, Group)%>%
+  summarise(Comp.1 = mean(Comp.1),
+            Comp.2 = mean(Comp.2),
+            Comp.3 = mean(Comp.3))
 
-#Kable
-kable(PermDisp, digits = 3, caption = "Table 2: Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing habitat selected differnces among the cottonmouth groups within the study area.")%>%
+#Component Percentage
+summary(pc)
+
+
+#Plot
+p<-ggplot(data = s1, aes(Comp.1, Comp.2))+
+  geom_point(alpha = 0.5, size = 1.5)+
+  geom_point(data = pcomp, aes(pcomp$Comp.1, pcomp$Comp.2, shape= Group), size = 5)+
+  #geom_label_repel(data = pcomp, aes(label = Group), size= 5, guide_legend= F)+
+  theme_bw(base_size = 24)+
+  theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))+
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_vline(xintercept = 0, lty = 2)+
+  stat_ellipse(type = "norm", aes(color = Type), 
+               show.legend = FALSE,size = 1, level = 0.95, linetype = 2)+
+  scale_color_manual(values = c("black","#636363"))+
+  guides(shape= guide_legend("Cottonmouth"))+
+  geom_text(aes(-2.5,2.2), label = paste("Cottonmouth"), col = "#636363", size = 9)+
+  geom_text(aes(-2.7,4), label = paste("General"), col = "black", size = 9)+
+  xlab(expression(atop("flooded sites" %<->% "non-flooded sites", paste("PC-1 (19.6%)" ))))+
+  ylab(expression(atop ("PC-2 (12.8%)", paste("lower temp sites" %<->% "higher temp sites"))))+
+  theme(legend.position=c(.9, 0.88), legend.background = element_rect(fill="White",
+      size=0.5, linetype="solid", colour ="black"))
+p
+```
+
+**Figure 1:** Principal component analysis of the environmental variables measured for the *A. piscivorus* (cottonmouth) and general available habitat selected comparison sites. Ellipses represent 95% condifence intervals for cottonmouths (grey) and general habitat (black). Mean principal component scores of the intra-specific cottonmouth groups (adult males, adult females, juveniles,  & young of the year [YOY]) plotted. Positive values for PC-1 indicate non-flooded areas with a greater distance from flooded areas, and positive PC-2 values indicate areas with higher thermal sites.
+
+```{r ANOVA, echo=TRUE, message=FALSE, warning=FALSE}
+pcomp<-pcomp[,2:4]
+names(pcomp)<- c( "PC-1","PC-2", "PC-3")
+row.names(pcomp)<-c("Female", "Juvenile", "Male", "YOY")
+pcomp[,1:3]<-round(pcomp[,1:3], digits = 3)
+
+
+C1<-aov(Comp.1~Group, s2)
+C2<-aov(Comp.2~Group, s2)
+C3<-aov(Comp.3~Group, s2)
+
+
+F.value<-c(anova(C1)$"F value"[1], anova(C2)$"F value"[1], anova(C3)$"F value"[1])
+p.value<-c(anova(C1)$"Pr(>F)"[1],anova(C2)$"Pr(>F)"[1],anova(C3)$"Pr(>F)"[1])
+
+stats<-data.frame(t(cbind(F.value, p.value)))
+names(stats)<-c( "PC-1","PC-2", "PC-3")
+pcomp<-rbind(pcomp,stats)
+
+row.names(pcomp)<-c("Female", "Juvenile", "Male", "YOY", "F", "P-value")
+
+ANOVA<-kable(pcomp, row.names = TRUE, col.names=c( "PC-1","PC-2", "PC-3"),digits = 3, align = "l", caption = "Table 2: Mean component scores of PCA on intra-specific habitat selection within 
+      cottonmouths with ANOVAs used to compare groups.")%>%
   kable_styling(c("striped", "bordered"))%>%
-  add_header_above(c(" " = 1, "PERMANOVA" = 2, "PERMDISP" = 2, "Pairwise-Comparison" = 6))%>%
-  footnote(general = "N(permutations) = 5000; df = 1",
-           "JUV = Juvenile",
-           "YOY = Young of the year")
+  pack_rows("ANOVA", 5,6,latex_gap_space = "2em")
+
+ANOVA
 ```
 
-```{r include=FALSE}
-pc<-PCA(s[,1:24], quali.sup = 1, scale.unit = T)
-```
+```{r Tukey HDS Test}
+TukeyHSD(C1)
 
-```{r include=FALSE}
-y<-fviz_pca_biplot(pc, col.ind = s$Type, palette = "jco", label = "var", col.var = "black",select.var = list(cos2=0.5),legend.title = "Group", addEllipses = T,repel = T,ggtheme = theme_bw())+
-  ggtitle("Cottonmouth Groups Habitat")
-var<-get_pca_var(pc)
-var$contrib[,1:2]
+TukeyHSD(C2)
+
+TukeyHSD(C3)
 ```
 
 
-```{r, fig.height=20, fig.width=30}
-grid.arrange(x,y, ncol= 2)
+```{r Envi & Loading Scores, echo=TRUE, message=FALSE, warning=FALSE}
+Description<- c("Temperature within 2 cm into the substrate or water","Temperature at surface level","Temperature at breast height", "Length of cover object closest to snake point","Width of cover object closest to snake point", "Percentage of canopy within quadrat", "Coverage within quadrat","Coverage within quadrat","Coverage within quadrat",
+"Coverage within quadrat", "Diameter of largest living woody stem", "Height of largest living woody stem", "Height of cover object closest to snake point", "Distance to nearest cover object", "Diameter of largest log within quadrat", "Distance to nearest water source", "Depth measured closest to snake point", "Coverage within quadrat","Coverage within quadrat","Coverage within quadrat","Coverage within quadrat", "Coverage within quadrat","Coverage within quadrat", "", "")
+
+loadings<-pc$loadings[,1:3]
+sdev<-t(data.frame(pc$sdev))
+eigen<-sdev[,1:3]
+Variance<-c(19.61, 12.83, 9.71)
+loadings<-rbind(loadings, eigen, Variance)
+loadings<-round(loadings, digits = 2)
+names(loadings)<-c("PC-1", "PC-2", "PC-3")
+loadings<-cbind(Description, loadings)
+
+row.names(loadings)<-c("Substrate Temp (◦C)","Surface Temp (◦C)", "Ambient Temp(◦C)","Cover Length(cm)", "Cover Width (cm)", "Canopy Closure (%)", "Rock Cover (%)", "Leaf Cover (%)", "Vegetative Cover (%)", "Fallen Log Cover (%)", "Woody Stem Diameter (cm)","Woody Stem Height (cm)", "Cover Height (cm)", "Distance To Cover (cm)","Log Diameter (cm)", "Distance To Water (cm)", "Water Depth (cm)", "Percent Land (%)", "Percent Water (%)", "Percent Woody Debris (%)", "Percent Debris (%)", "Percent Floating Vegetation (%)", "Percent Bare Soil (%)", "Eigenvalue", "Explained Variance")
+
+load<-kable(loadings, row.names = TRUE,digits = 2, col.names = c("Description", "PC-1", "PC-2", "PC-3"), align = "l", booktabs = T, caption = "Table 1: Factor loadings from principal component analysis of environmental variables measured for cottonmouths and general habitat comparitsion sites")%>%
+  kable_styling(c("striped", "bordered"))%>%
+  pack_rows("",24,25,latex_gap_space = "2em")
+
+load
 ```
 
-**Figure 1:** On the left, principal component analysis for the cottonmouth (snake) habitats selected compared to the general habitat that was measured. The variables with the highest contribution to Dim1 are Percent Land (19%) and Percent Water (19%). The highest contribution to Dim 2 are Ambient Temp (23%), Surface Temp (25%) and Substrate Temp(22%).On the right, principal component analysis on the relationship of the habitat variables among the cottonmouth groups (Female, Juvenile, Male, & YOY)(YOY = young of the year). The variables with the highest contribution were Percent Land (15.7%) and Percent Water (16.2%) in Dim 1, and Ambient Temp (21,4%), Surface Temp (24.2%) and Substrate Temp (16.5%) in Dim2. Ellipses represent 95% CI. 
 
-
-```{r Regression Line, echo=FALSE}
-s1<-read.csv("data/snake.SVL.csv")
-s1<-na.omit(s1)
-pc2<- princomp(s[,-1], cor = T, scores = T)
-PCA2<-cbind(s1, pc2$scores[,1:3])
-lm<-lm(SVL~Comp.1, PCA2)
-
-ggplot(PCA2, aes(x= SVL, y= Comp.1))+
-  geom_point(size = 2, aes(color = Type))+
+```{r Regression Line, echo=TRUE}
+#Linear Regression
+mod<-lm(SVL~Comp.1,s2)
+summary (mod)
+ggplot(s2, aes(x= SVL, y= Comp.1))+
+  geom_point(size = 2, aes(shape = Group))+
   xlim(209, 1061)+
   geom_smooth(method = "lm", color= "black")+
   geom_hline(yintercept = 0, lty = 2) +
   geom_vline(xintercept = 600, lty = 2)+
   theme_bw(base_size = 24)+
-  geom_text(aes(890, 6, label = paste("R-squared = 0.02")), color="black")+
-  geom_text(aes(880, 5.4, label = paste("F= 3.29;P< 0.01")), color = "black")+
+  geom_text(aes(1000, 6, label = paste("R-squared = 0.03")), color="black")+
+  geom_text(aes(1000, 5.4, label = paste("F= 5.04; P= 0.03")), color = "black")+
   xlab("Snout-vent length (mm)")+
-  ylab("Dim1 (20.3%)")+
-  geom_text(data = NULL, label = "Drier", color= "blue", x =220, y= 7)+
-  geom_text(data = NULL, label = "Wetter", color= "blue", x =240, y= -4.85)
+  ylab(expression(atop("flooded sites" %<->% "non-flooded sites", paste("PC-1 (19.6%)" ))))
 ```
-**Figure 2:** Linear regression of Principal Component scores of PC-1 comparison of habitat selection among the cottonmouth groups (Males, Females, Juveniles, and YOY) and cottonmouth snout-vent lengths. 
+**Figure 2:** Linear regression of Principal Component scores of PC-1 comparison of habitat selection among the intra-specific cottonmouth groups(Males, Females, Juveniles, and YOY) and their snout-vent lengths. 
 
 ```{r randomForest, include=FALSE}
 #Loading data
