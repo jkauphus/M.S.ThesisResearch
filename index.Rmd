@@ -354,11 +354,15 @@ load
 ```
 
 
-```{r Regression Line, echo=TRUE}
+```{r Regression Line, fig.width = 10,echo=TRUE}
 #Linear Regression
 mod<-lm(SVL~Comp.1,s2)
 summary (mod)
-ggplot(s2, aes(x= SVL, y= Comp.1))+
+
+mod2<-lm(SVL~Comp.2, s2)
+summary(mod2)
+
+PC1<-ggplot(s2, aes(x= SVL, y= Comp.1))+
   geom_point(size = 2, aes(shape = Group))+
   xlim(209, 1061)+
   geom_smooth(method = "lm", color= "black")+
@@ -369,6 +373,8 @@ ggplot(s2, aes(x= SVL, y= Comp.1))+
   geom_text(aes(1000, 5.4, label = paste("F= 5.04; P= 0.03")), color = "black")+
   xlab("Snout-vent length (mm)")+
   ylab(expression(atop("flooded sites" %<->% "non-flooded sites", paste("PC-1 (19.6%)" ))))
+
+PC1
 ```
 **Figure 2:** Linear regression of Principal Component scores of PC-1 comparison of habitat selection among the intra-specific cottonmouth groups(Males, Females, Juveniles, and YOY) and their snout-vent lengths. 
 
@@ -379,17 +385,29 @@ s<-na.omit(s)
 s<-s[,c(1:24)]
 ```
 
-```{r checking Multicolinearrity, include=FALSE}
+```{r Checking Multicolinearrity, include=FALSE}
+corrrel<-cor(s[,2:24])
+findCorrelation(corrrel, cutoff = 0.7)
 
 #OR with VIF
-model<-lm(Substrate.Temp~., data = s[,-1])
+model<-lm(Type~., data = s)
 vif(model)
 
 #From the VIF the X.Land and X.Water have high degree of multicollinearity so I shall remove X.Land
-s<-s[,-19] #Removed X.Land
-model<-lm(Substrate.Temp~., data = s[,-1])
+s<-s[,c(-19,-2,-4)] #Removed X.Land, and Substrate Temp, and Surface Temp
+model<-lm(Type~., data = s)
 vif(model)
+cor(s[,2:21])
+findCorrelation((cor(s[,2:21])), cutoff= 0.75)
 ```
+
+```{r Checking MIR, eval=FALSE, include=FALSE}
+#Model Improvement Metric
+RF<-randomForest(Type~.,s, ntree= 5000)
+RF
+varImp(RF, scale = F)
+```
+
 
 ```{r 10-Fold Cross Validation, echo=TRUE}
 set.seed(123)
@@ -431,99 +449,40 @@ c9<- randomForest(Type~., data = train, ntree = 5000)
 c10<- randomForest(Type~., data = train, ntree = 5000)
 ```
 
-```{r Out-of-Bag}
-OOB<-c(a1$err.rate[1000,1],a2$err.rate[1000,1],a3$err.rate[1000,1],a4$err.rate[1000,1],a5$err.rate[1000,1],a6$err.rate[1000,1],
-       a7$err.rate[1000,1],a8$err.rate[1000,1],a9$err.rate[1000,1],a10$err.rate[1000,1],b1$err.rate[1000,1],b2$err.rate[1000,1],
-       b3$err.rate[1000,1],b4$err.rate[1000,1],b5$err.rate[1000,1],b6$err.rate[1000,1],b7$err.rate[1000,1],b8$err.rate[1000,1],
-       b9$err.rate[1000,1],b10$err.rate[1000,1],c1$err.rate[1000,1],c2$err.rate[1000,1],c3$err.rate[1000,1],c4$err.rate[1000,1],
-       c5$err.rate[1000,1],c6$err.rate[1000,1],c7$err.rate[1000,1],c8$err.rate[1000,1],c9$err.rate[1000,1],c10$err.rate[1000,1])
-
-OOB<-c(1-min(OOB),1-mean(OOB), 1-max(OOB))
-```
-
 ```{r Error Rate Plot, eval=FALSE, include=FALSE}
 #Error rate of Random Forest
 plot(a1)
 ```
 
 
-```{r Cross Validation}
-p1<-predict(a1, test)
-cv1<-confusionMatrix(p1, positive = "SNAKE",test$Type)
-p2<-predict(a2, test)
-cv2<-confusionMatrix(p2, test$Type,positive = "SNAKE")
-p3<-predict(a3, test)
-cv3<-confusionMatrix(p3, test$Type, positive = "SNAKE")
-p4<-predict(a4, test)
-cv4<-confusionMatrix(p4, test$Type, positive = "SNAKE")
-p5<-predict(a5, test)
-cv5<-confusionMatrix(p5, test$Type, positive = "SNAKE")
-p6<-predict(a6, test)
-cv6<-confusionMatrix(p6, test$Type, positive = "SNAKE")
-p7<-predict(a7, test)
-cv7<-confusionMatrix(p7, test$Type, positive = "SNAKE")
-p8<-predict(a8, test)
-cv8<-confusionMatrix(p8, test$Type, positive = "SNAKE")
-p9<-predict(a9, test)
-cv9<-confusionMatrix(p9, test$Type, positive = "SNAKE")
-p10<-predict(a10, test)
-cv10<-confusionMatrix(p10, test$Type, positive = "SNAKE")
-p11<-predict(b1, test)
-cv11<-confusionMatrix(p11, test$Type, positive = "SNAKE")
-p12<-predict(b2, test)
-cv12<-confusionMatrix(p12, test$Type, positive = "SNAKE")
-p13<-predict(b3, test)
-cv13<-confusionMatrix(p13, test$Type, positive = "SNAKE")
-p14<-predict(b4, test)
-cv14<-confusionMatrix(p14, test$Type, positive = "SNAKE")
-p15<-predict(b5, test)
-cv15<-confusionMatrix(p15, test$Type, positive = "SNAKE")
-p16<-predict(b6, test)
-cv16<-confusionMatrix(p16, test$Type, positive = "SNAKE")
-p17<-predict(b7, test)
-cv17<-confusionMatrix(p17, test$Type, positive = "SNAKE")
-p18<-predict(b8, test)
-cv18<-confusionMatrix(p18, test$Type, positive = "SNAKE")
-p19<-predict(b9, test)
-cv19<-confusionMatrix(p19, test$Type, positive = "SNAKE")
-p20<-predict(b10, test)
-cv20<-confusionMatrix(p20, test$Type, positive = "SNAKE")
-p21<-predict(c1, test)
-cv21<-confusionMatrix(p21, test$Type, positive = "SNAKE")
-p22<-predict(c2, test)
-cv22<-confusionMatrix(p22, test$Type, positive = "SNAKE")
-p23<-predict(c3, test)
-cv23<-confusionMatrix(p23, test$Type, positive = "SNAKE")
-p24<-predict(c4, test)
-cv24<-confusionMatrix(p24, test$Type, positive = "SNAKE")
-p25<-predict(c5, test)
-cv25<-confusionMatrix(p25, test$Type, positive = "SNAKE")
-p26<-predict(c6, test)
-cv26<-confusionMatrix(p26, test$Type, positive = "SNAKE")
-p27<-predict(c7, test)
-cv27<-confusionMatrix(p27, test$Type, positive = "SNAKE")
-p28<-predict(c8, test)
-cv28<-confusionMatrix(p28, test$Type, positive = "SNAKE")
-p29<-predict(c9, test)
-cv29<-confusionMatrix(p29, test$Type, positive = "SNAKE")
-p30<-predict(c10, test)
-cv30<-confusionMatrix(p30, test$Type, positive = "SNAKE")
-#Creating CV Table
-CVTABLE<-t(data.frame(cv1$overall,cv2$overall,cv3$overall,cv4$overall,cv5$overall,cv6$overall,
-                        cv7$overall,cv8$overall,cv9$overall,cv10$overall,cv11$overall,cv12$overall,
-                        cv13$overall,cv14$overall,cv15$overall,cv16$overall,cv17$overall,cv18$overall,
-                        cv19$overall,cv20$overall,cv21$overall,cv22$overall,cv23$overall,cv24$overall,
-                        cv25$overall,cv26$overall,cv27$overall,cv28$overall,cv29$overall,cv30$overall))
+```{r Out-of-Bag}
+OOB1<-c(a1$err.rate[1000,1],a2$err.rate[1000,1],a3$err.rate[1000,1],a4$err.rate[1000,1],a5$err.rate[1000,1],a6$err.rate[1000,1],
+       a7$err.rate[1000,1],a8$err.rate[1000,1],a9$err.rate[1000,1],a10$err.rate[1000,1],b1$err.rate[1000,1],b2$err.rate[1000,1],
+       b3$err.rate[1000,1],b4$err.rate[1000,1],b5$err.rate[1000,1],b6$err.rate[1000,1],b7$err.rate[1000,1],b8$err.rate[1000,1],
+       b9$err.rate[1000,1],b10$err.rate[1000,1],c1$err.rate[1000,1],c2$err.rate[1000,1],c3$err.rate[1000,1],c4$err.rate[1000,1],
+       c5$err.rate[1000,1],c6$err.rate[1000,1],c7$err.rate[1000,1],c8$err.rate[1000,1],c9$err.rate[1000,1],c10$err.rate[1000,1])
+
+OOB<-c(1-min(OOB1),1-mean(OOB1), 1-max(OOB1))
+```
 
 
-CV2TABLE<-t(data.frame(cv1$byClass,cv2$byClass,cv3$byClass,cv4$byClass,cv5$byClass,cv6$byClass,
-                        cv7$byClass,cv8$byClass,cv9$byClass,cv10$byClass,cv11$byClass,cv12$byClass,
-                        cv13$byClass,cv14$byClass,cv15$byClass,cv16$byClass,cv17$byClass,cv18$byClass,
-                        cv19$byClass,cv20$byClass,cv21$byClass,cv22$byClass,cv23$byClass,cv24$byClass,
-                        cv25$byClass,cv26$byClass,cv27$byClass,cv28$byClass,cv29$byClass,cv30$byClass))
 
-cv_table<-data.frame(CVTABLE,CV2TABLE)
+```{r}
+files<-list(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10)
+
+cv<-(function(x){
+p<-predict(x, test)
+cm<-confusionMatrix(p, positive = "SNAKE",test$Type)
+
+CVTABLE<-t(data.frame(cm$overall))
+CV2TABLE<-t(data.frame(cm$byClass))
+
+cv_table<-cbind(CVTABLE,CV2TABLE)
 cv_table<-cv_table[,c(1,2,8,9)]
+cv_table
+})
+
+cv_table<-t(data.frame(lapply(files, cv)))
 
 cv_max<-c(max(cv_table[,1]), max(cv_table[,2]), max(cv_table[,3]), max(cv_table[,4]))
 cv_mean<-c(mean(cv_table[,1]), mean(cv_table[,2]), mean(cv_table[,3]), mean(cv_table[,4]))
@@ -534,42 +493,24 @@ cv_table<-data.frame(rbind(cv_max,cv_mean, cv_min))
 RandomForest_Model<-c("Maximum", "Mean", "Minimum")
 ```
 
-
 ```{r Calculating AUC}
-#Minimal Model AUC
-pred1<-predict(c1, test, type = "prob")
-pred1<-pred1[,2]
-pred1<-prediction(pred1, test$Type)
+
+AUC<- function(z){
+pred<-predict(z, test, type = "prob")
+pred<-pred[,2]
+pred<-prediction(pred, test$Type)
 
 #AUC (Area Under The Curve)
-auc1<-performance(pred1, "auc")
-auc1<-unlist(slot(auc1, "y.values"))
-min_auc<-round(auc1, 4)
+auc<-performance(pred, "auc")
+auc<-unlist(slot(auc, "y.values"))
+  
+}
 
+AUC<-t(data.frame(lapply(files, AUC)))
 
-#Mean Model AUC
-pred1<-predict(a8, test, type = "prob")
-pred1<-pred1[,2]
-pred1<-prediction(pred1, test$Type)
-
-#AUC (Area Under The Curve)
-auc1<-performance(pred1, "auc")
-auc1<-unlist(slot(auc1, "y.values"))
-mean_auc<-round(auc1, 4)
-
-
-#Mean Model AUC
-pred1<-predict(a1, test, type = "prob")
-pred1<-pred1[,2]
-pred1<-prediction(pred1, test$Type)
-
-#AUC (Area Under The Curve)
-auc1<-performance(pred1, "auc")
-auc1<-unlist(slot(auc1, "y.values"))
-max_auc<-round(auc1, 4)
-
-AUC<-c(min_auc, mean_auc, max_auc)
+AUC<-c(max(AUC), mean(AUC), min(AUC))
 ```
+
 
 ```{r Table}
 models<-cbind(RandomForest_Model, cv_table, OOB, AUC)
@@ -584,18 +525,20 @@ kable(models, row.names = FALSE, col.names=c("Random Forest Model", "Accuracy", 
 ```{r Variable Importance, include=FALSE}
 #Maximal Model was a1 in the iterations, so I will now use that to create the partial - least square biplots of the top 4 most contributing variables,
 
-Gini<-importance(c10, class = "SNAKE")
+#varImp(c10) Yields Similar to GINI but is relative importance
+
+Gini<-importance(a3, class = "SNAKE")
 
 Gini<-data.frame(Gini)
-Habitat_Variables <- c("Substrate Temp","Surface Temp", "Ambient Temp","Cover Length", "Cover Width", "Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover", "Fallen Log Cover", "Woody Stem Diameter","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter", "Distance To Water", "Water Depth", "Percent Water", "Percent Woody Debris", "Percent Debris", "Percent Floating Vegetation", "Percent Bare Soil")
+Habitat_Variables <- c("Surface Temp", "Cover Length", "Cover Width", "Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover", "Fallen Log Cover", "Woody Stem Diameter","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter", "Distance To Water", "Water Depth", "Percent Water", "Percent Woody Debris", "Percent Debris", "Percent Floating Vegetation", "Percent Bare Soil")
 D<-cbind(Habitat_Variables,Gini)
 
 G<-ggplot(D, aes( x = reorder(Habitat_Variables, MeanDecreaseGini), y=MeanDecreaseGini))+
   geom_col(width = .4)+
   ylim(0,25)+
   coord_flip()+
-  xlab("Habitat Variables")+
-  ylab("Mean decrease in Gini")+
+  xlab("Environmental Variables")+
+  ylab("Relative Importance")+
   theme_bw()
 
 
@@ -660,7 +603,7 @@ z1<-ggplot(data = z, aes(x,y))+
 ```{r Variable importance Plot}
 G
 ```
-**Figure 3:**The Mean decrease in Gini, a metric for variable importance, on the habitat variables from the Minimum Random Forest model of Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
+**Figure 3:**The Relative Importance (based on the Mean decrease in Gini) on the environmental variables from the Maximum Random Forest model on Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
 
 ```{r Partial Dependance Plots}
 grid.arrange(w1,x1,y1,z1, ncol= 2)
