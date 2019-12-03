@@ -1,5 +1,5 @@
 ---
-title: "*Agkistrodon piscivorus*; The Swamp Generalist"
+title: "*Agkistrodon piscivorus*;     The Swamp Generalist"
 author: "Jack Kauphusman"
 date: "12/1/2019"
 output:
@@ -55,17 +55,17 @@ Every habitat has a finite amount of resources, and within these habitats’ org
 
 A common mechanism that is used in snake species to limit the effects of competition is ontogenetic shift. An ontogenetic shift is a characteristic or behavioral change that occurs with age.An ontogenetic shift can be a change in prey type, size, thermal and microhabitat preferences as an individual grows (Lagesse and Ford 1996, Herczeg et al. 2007, Eskew et al. 2009). The cottonmouth (Agkistrodon piscivorus) is a species that has shown to display an ontogenetic shift in prey acquisition and microhabitat preference (Eskew et al. 2009). However, in a dynamic habitat such as a riverine backwater swamp, where the water table changes often, is the ontogenetic shift in cottonmouths present in these environments?
 
-![](data/Wetlands.gif)
+![Mitsch & Gosselink, 2001](data/Wetlands.gif)
 
-<p style= "color:red">We had three main question:
+<span style= "color:red">We had three main question:</span>
 
-1:What are the habitat preferences of the cottonmouth?
+<span style= "color:red">1: What are the habitat preferences of the cottonmouth?</span>
 
-2:Are their intra-specific differences among the cottonmouths?
+<span style= "color:red">2: Are their intra-specific differences among the cottonmouths?</span>
 
-3:Can you consider the cottonmouth a to be generalist species in regards to habitat selection?
+<span style= "color:red">3: Can you consider the cottonmouth a to be generalist species in regards to habitat selection?
 
-**We tested the hypothesis that cottonmouths shift in habitat selection ontogenetically, and this document is to briefly summarize those initial findings.** </p> 
+**We tested the hypothesis that cottonmouths shift in habitat selection ontogenetically, and this document is to briefly summarize those initial findings.**  
 
 
 # **Background**
@@ -114,7 +114,7 @@ ggplot(data = agk_xy, aes(x=longitude, y=latitude)) +
   ggtitle("Distribution Map")
 
 ```
-Map 1:The distribution of cottonmouth (*A. piscivorus*) throughouth the continental United States. 
+**Map 1:** The distribution of cottonmouth (*A. piscivorus*) throughouth the continental United States. 
 
 # **Methods**
 
@@ -122,11 +122,11 @@ Map 1:The distribution of cottonmouth (*A. piscivorus*) throughouth the continen
 study<-read.csv("data/CottonmouthTotal-11-27.csv")
 ```
 
+## Study Area
 
 Data was collected along the Cumberland River Bicentennial Trail (CRBT), Cheatham County, Tennessee, USA (36˚17’ N, 87˚05’W). A boundary of an approximately 76 ha area was constructed using ArcMap (ESRI Products) to be used as the focal study area and the habitats within to be assessed. The trail was included within the boundary and divided the mixed lowland forest and slough wetlands from the upland limestone bluffs and rocky outcrops. Cottonmouths used the upland forest and limestone bluffs as overwintering sites and occupied the lowland forest slough during the active season. The landscape features that bordered the study area were the limestone bluffs and backwater streams along the northern portions, the Cumberland River along the west and south, and crop fields and urban development along the southern portions. These landscape features appeared to isolate this population of cottonmouths from dispersal. Unpublished telemetry data (Smith 2009) noted that snakes did not leave the study area, however, an adult male was observed attempting to cross a road toward the Cumberland River but was unfortunately killed by a passing vehicle.  
 
 The habitat types found within the study area are the buttonbush slough in the central portion (12.6 ha), characterized by relatively open canopy, deeper water (50-150 cm), and mats of floating vegetation (Hydrocotyle ranunculoides & Ludwigia palustris) scattered throughout the slough. An open water habitat (> 100cm) is located toward the western portion of the study area. The seasonally flooded lowland forest (20.9 ha), dominated by red maples (Acer rubrum), has the denser canopy closure for the wetland, and is located between the slough and upland forest. Toward the southern portion between the slough and crop fields is a transitional edge area (15.4 ha) dominated by dense grass vegetation and occasionally floods (<10cm) in some portions throughout the year.  The upland forest habitat (16.3 ha) was dominated by oak trees (Quercus sp.) and had dense canopy closure and higher percentage of bare soil. Three main streams flow into the slough from the upland forest and provide a permanent source of water to the slough, along with periodic flooding from the Cumberland River, and groundwater seepage. A constructed levee divides the slough from adjacent crop fields, and during the fall waterfowl hunt, a culvert is opened from the levee to reduce the flooded areas.  
-
 
 ```{r Interactive Ploty Map, message=FALSE, warning=FALSE}
 #Setting Up Coordinates
@@ -164,8 +164,7 @@ autoplot(raster_utm, expand = TRUE) + theme_bw() +
   ggtitle("Study Area")
   
 ```
-
-Map 2: The locations cottonmouths were found within the study area during the active seasons (May - October) of 2012, 2013, & 2019.
+**Map 2:** The locations cottonmouths were found within the study area during the active seasons (May - October) of 2012, 2013, & 2019.
 
 ## Field Collection 
 
@@ -215,6 +214,7 @@ geom_raster(data = rast,aes(X, Y, fill = Landcover))+
 
 NLCD
 ```
+Map 3: The USGS: National Land Cover Dataset of 2011 downloaded from the Google Earth Engine.
 
 ## Analysis of Habitat Selection: Ecological Niche 
 
@@ -250,10 +250,10 @@ To investigate cottonmouth habitat compared to general available habitat we reta
 The PERMANOVA/PERMDISP tests, used to verify the structural relationship between cottonmouth habitat selection and general habitat available, found a significant difference between the groups within multivariate space (PERMANOVA; P< 0.001; Pseudo-F = 19.9; df = 1; Table 2). Specifically, the results from the PERMDISP test showed that differences between cottonmouth and general habitat sites were attributed to the heterogenous distribution of variance of the environmental variables between the two groups (PERMDISP; P<0.01; F = 13.9; df = 1; Table 1). The PERMANOVA/PERMDISP verified the observations from PCA, in that the heterogenous dispersion within each group show that cottonmouth habitat was partitioned within the general available habitat (Fig 1).
 
 
-```{r Variable Manipulation}
+```{r Variable Manipulation, message=FALSE, warning=FALSE}
 Temp<-(study$Surface.Temp+study$Ambient.Temp)/2
 study<-cbind(study,Temp)
-s<-study[,c(3,9,10,11,12,13,15,16,17,18,19,20,22,23,25,26,27,28,37, 38)]
+s<-study[,c(3,9,10,11,12,13,15,16,17,18,19,20,22,23,25,26,27,28,37,38)]
 s<-na.omit(s)
 ```
 
@@ -295,8 +295,7 @@ p<-ggplot(data = s, aes(Comp.1, Comp.2))+
 
 ```
 
-
-```{r Envi & Loading Scores}
+```{r Envi & Loading Scores, message=FALSE, warning=FALSE}
 Description<- c("Percentage of canopy above quadrat", "Coverage within quadrat","Coverage within quadrat","Coverage within quadrat","Coverage within quadrat", "Height of largest living woody stem", "Height of cover object closest to snake point", "Distance to nearest cover object", "Diameter of largest log within quadrat", "Distance to nearest water source", "Water depth measured within quadrat", "Coverage within quadrat","Coverage within quadrat","Coverage within quadrat", "Coverage within quadrat","Mean temperature within quadrat", "", "")
 
 loadings<-pc$loadings[,1:3]
@@ -316,8 +315,6 @@ load<-kable(loadings, row.names = TRUE,digits = 3, col.names = c("Description", 
   pack_rows("",17,18,latex_gap_space = "2em")
 load
 ```
-
-
 
 ```{r CowPLot, echo=TRUE, fig.height=8, fig.width=12, message=FALSE, warning=FALSE}
 
@@ -339,7 +336,7 @@ ggdraw(p2)
 **Figure 1:** Principal component analysis of the environmental variables measured for the *A. piscivorus* (cottonmouth) and general available habitat selected comparison sites. Ellipses represent 95% condifence intervals for cottonmouths (grey) and general habitat (black). Mean principal component scores of the intra-specific cottonmouth groups (adult males, adult females, juveniles,  & young of the year [YOY]) plotted. Positive values for PC-1 indicate non-flooded areas with a greater distance from flooded areas, and positive PC-2 values indicate areas with higher thermal sites. Density counts for the NLDC:USGS habitat locations where cottonmouths were found within terrestrial (green),
 wetlands (blue), and aquatic (red) land cover types.
 
-```{r PERMANOVA & PERMDISP Tests, fig.height=4, fig.width=8}
+```{r PERMANOVA & PERMDISP Tests, fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
 #PERMANOVA
 Perm1<-adonis(s[,c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,20)]~ Type, data = s, method='eu')
 Perm1<-cbind(Perm1$aov.tab[1,4], Perm1$aov.tab[1,6])
@@ -366,9 +363,9 @@ PERM
 
 The ANOVA test on the principal component scores investigating intra-specific habitat selection differences among the cottonmouth population found no significant difference among groups within PC-1 and PC-3 (PC-1: df = 3,  F = 1.68, P = 0.17; PC-3: df = 3, F = 0.129, P = 0.94; Table 3). However, there was significance in habitat selection among cottonmouths within PC-2 (PC-2: df = 3, F = 3.619, P= 0.015; Table 3).  The Tukey’s HSD test, on the ANOVA of PC-2, found that mean component scores of adult females were significantly different than YOY (Tukey’s HSD; P = 0.023). Adult females were more negatively associated with thermal quality sites (PC-2) compared to YOY with a mean component score difference of 1.25.  
 
-Linear regression comparing PC-1 and body size (SVL) found a significant negative correlation (F = 3.29; P <0.01; d.f. = 1; Fig 2), indicating that larger individuals were found in more flooded habitat sites compared to smaller individuals. Caution must be used in interpreting the results as this relationship as it had a low explanatory power in PC-1 (19.6%) and R2 (0.03) value. 
+Linear regression comparing PC-1 and body size (SVL) found a significant negative correlation (F = 3.29; P <0.01; d.f. = 1; Fig 2), indicating that larger individuals were found in more flooded habitat sites compared to smaller individuals. Caution must be used in interpreting the results as this relationship as it had a low explanatory power in PC-1 (19.6%) and R2 (0.03) value. 
 
-```{r ANOVA}
+```{r ANOVA, message=FALSE, warning=FALSE}
 pcomp<-pcomp[,2:4]
 names(pcomp)<- c( "PC-1","PC-2", "PC-3")
 row.names(pcomp)<-c("Female", "Juvenile", "Male", "YOY")
@@ -394,13 +391,13 @@ ANOVA<-kable(pcomp, row.names = TRUE, col.names=c( "PC-1","PC-2", "PC-3"),digits
 ANOVA
 ```
 
-```{r Tukey HSD}
+```{r Tukey HSD, message=FALSE, warning=FALSE}
 TukeyHSD(C1)
 TukeyHSD(C2)
 TukeyHSD(C3)
 ```
 
-```{r Linear Regression, fig.height=6, fig.width=14}
+```{r Linear Regression, fig.height=6, fig.width=14, message=FALSE, warning=FALSE}
 #Linear Regression
 mod<-lm(SVL~Comp.1,group)
 mod2<-lm(SVL~Comp.2,group)
@@ -416,7 +413,8 @@ LR1<-ggplot(group, aes(x= SVL, y= Comp.1))+
   geom_text(aes(800, 5.4, label = paste("F= 5.28; P= 0.023")), color = "black")+
   xlab("Snout-vent length (mm)")+
   ylab(expression(atop("aquatic site" %<->% "terrestrial sites", paste("PC-1 (22.6%)" ))))+
-  guides(shape = "none")
+  guides(shape = "none")+
+  theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
 
 LR2<-ggplot(group, aes(x= SVL, y= Comp.2))+
   geom_point(size = 2, aes(shape = Group))+
@@ -429,7 +427,8 @@ LR2<-ggplot(group, aes(x= SVL, y= Comp.2))+
   geom_text(aes(800, 5.4, label = paste("F= 7.06; P= 0.008")), color = "black")+
   xlab("Snout-vent length (mm)")+
   ylab(expression(atop("aquatic site" %<->% "terrestrial sites", paste("PC-2 (11.8%)" ))))+
-  guides(shape = "none")
+  guides(shape = "none")+
+  theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
 
 plot_grid(LR1, LR2, labels=c("A)", "B)"), ncol = 2, nrow = 1)
 ```
@@ -441,5 +440,263 @@ Prior to developing the Random Forest models, we used a tested multicollinearity
 
 Our maximum-accuracy RF model identified that distance to water (cm), water depth (cm), percent bare soil (%), and percent water (%) were the most important predictors in identifying the occurrence of a cottonmouth within an area. The medium importance environmental variables were canopy closure (%), distance to a cover object (%), and percent floating vegetation (%). To clarify, the important predictor variables validate cottonmouths strong association to swamp habitat. Partial dependence found that the probability of occurrence of a cottonmouth was negatively related to site distance from a water source (Fig 4A). Response to water depth sharply increased from 0 – 20 cm and then decreased in occurrence as depth increased past 25 cm (Fig 4B). Response to water cover increased in occurrence and then plateaued past 10% cover and the response to bare soil cover increased up to 30% and then slightly declined in cottonmouth occurrence (Fig 4 C & D).
 
+```{r Feature Selection for RF Model}
+#Used the Drop Column Feature Selection
+rf<-s[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,20)]
+rft<-rf[,c(1,2,3,4,5,7,8,9,11,12,13,14,15,16,17)]
+#Drop Column Feature Importance
+#a<- randomForest(Type~., data = rft, ntree = 10000)
+#randomForest::importance(a)
+
+#REMOVED 6 & 10
+#Fallen Log and Log Diameter
+```
+
+```{r 10-Fold Cross Validation, echo=TRUE}
+set.seed(123)
+ind<-sample(2,nrow(rft),replace = T, prob = c(0.9,0.1))
+train<-rft[ind==1,]
+test<-rft[ind==2,]
+```
+
+```{r 30 iterations, echo=TRUE}
+a1<- randomForest(Type~., data = train, ntree = 5000)
+a2<- randomForest(Type~., data = train, ntree = 5000)
+a3<- randomForest(Type~., data = train, ntree = 5000)
+a4<- randomForest(Type~., data = train, ntree = 5000)
+a5<- randomForest(Type~., data = train, ntree = 5000)
+a6<- randomForest(Type~., data = train, ntree = 5000)
+a7<- randomForest(Type~., data = train, ntree = 5000)
+a8<- randomForest(Type~., data = train, ntree = 5000)
+a9<- randomForest(Type~., data = train, ntree = 5000)
+a10<- randomForest(Type~., data = train, ntree = 5000)
+b1<- randomForest(Type~., data = train, ntree = 5000)
+b2<- randomForest(Type~., data = train, ntree = 5000)
+b3<- randomForest(Type~., data = train, ntree = 5000)
+b4<- randomForest(Type~., data = train, ntree = 5000)
+b5<- randomForest(Type~., data = train, ntree = 5000)
+b6<- randomForest(Type~., data = train, ntree = 5000)
+b7<- randomForest(Type~., data = train, ntree = 5000)
+b8<- randomForest(Type~., data = train, ntree = 5000)
+b9<- randomForest(Type~., data = train, ntree = 5000)
+b10<- randomForest(Type~., data = train, ntree = 5000)
+c1<- randomForest(Type~., data = train, ntree = 5000)
+c2<- randomForest(Type~., data = train, ntree = 5000)
+c3<- randomForest(Type~., data = train, ntree = 5000)
+c4<- randomForest(Type~., data = train, ntree = 5000)
+c5<- randomForest(Type~., data = train, ntree = 5000)
+c6<- randomForest(Type~., data = train, ntree = 5000)
+c7<- randomForest(Type~., data = train, ntree = 5000)
+c8<- randomForest(Type~., data = train, ntree = 5000)
+c9<- randomForest(Type~., data = train, ntree = 5000)
+c10<- randomForest(Type~., data = train, ntree = 5000)
+```
+
+```{r Error Rate Plot, eval=FALSE, include=FALSE}
+#Error rate of Random Forest
+plot(a1)
+```
 
 
+```{r Out-of-Bag}
+OOB1<-c(a1$err.rate[5000,1],a2$err.rate[5000,1],a3$err.rate[5000,1],a4$err.rate[5000,1],a5$err.rate[5000,1],a6$err.rate[5000,1],
+       a7$err.rate[5000,1],a8$err.rate[5000,1],a9$err.rate[5000,1],a10$err.rate[5000,1],b1$err.rate[5000,1],b2$err.rate[5000,1],
+       b3$err.rate[5000,1],b4$err.rate[5000,1],b5$err.rate[5000,1],b6$err.rate[5000,1],b7$err.rate[5000,1],b8$err.rate[5000,1],
+       b9$err.rate[5000,1],b10$err.rate[5000,1],c1$err.rate[5000,1],c2$err.rate[5000,1],c3$err.rate[5000,1],c4$err.rate[5000,1],
+       c5$err.rate[5000,1],c6$err.rate[5000,1],c7$err.rate[5000,1],c8$err.rate[5000,1],c9$err.rate[5000,1],c10$err.rate[5000,1])
+
+OOB<-c(1-min(OOB1),1-mean(OOB1), 1-max(OOB1))
+```
+
+```{r Cross-Validation}
+files<-list(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10)
+
+cv<-(function(x){
+p<-predict(x, test)
+cm<-caret::confusionMatrix(p, positive = "SNAKE",test$Type)
+
+CVTABLE<-t(data.frame(cm$overall))
+CV2TABLE<-t(data.frame(cm$byClass))
+
+cv_table<-cbind(CVTABLE,CV2TABLE)
+cv_table<-cv_table[,c(1,2,8,9)]
+cv_table
+})
+
+cv_table<-t(data.frame(lapply(files, cv)))
+
+cv_max<-c(max(cv_table[,1]), max(cv_table[,2]), max(cv_table[,3]), max(cv_table[,4]))
+cv_mean<-c(mean(cv_table[,1]), mean(cv_table[,2]), mean(cv_table[,3]), mean(cv_table[,4]))
+cv_min<-c(min(cv_table[,1]), min(cv_table[,2]), min(cv_table[,3]), min(cv_table[,4]))
+
+cv_table<-data.frame(rbind(cv_max,cv_mean, cv_min))
+
+RandomForest_Model<-c("Maximum", "Mean", "Minimum")
+```
+
+```{r Calculating AUC}
+
+AUC<- function(z){
+pred<-predict(z, test, type = "prob")
+pred<-pred[,2]
+pred<-prediction(pred, test$Type)
+
+#AUC (Area Under The Curve)
+auc<-performance(pred, "auc")
+auc<-unlist(slot(auc, "y.values"))
+  
+}
+
+AUC<-t(data.frame(lapply(files, AUC)))
+
+AUC<-c(max(AUC), mean(AUC), min(AUC))
+```
+
+```{r Table}
+models<-cbind(RandomForest_Model, cv_table, OOB, AUC)
+
+kable(models, row.names = FALSE, col.names=c("Random Forest Model", "Accuracy", "Kappa", "Sensitivity", "Specificity", "OOB", "AUC"),digits = 3, caption = "Table 3: Performance metrics for the 30-iteration random forest model on cottonmouth habitat selection compared to general habitat available within the study area.")%>%
+  kable_styling(c("striped", "bordered"))%>%
+  footnote(general = "N(trees) = 5000;",
+           "OOB = Out of Bag Accuracy",
+           "AUC = Area Under the Curve")
+```
+
+```{r Variable Importance, include=FALSE}
+#Maximal Model was a1 in the iterations, so I will now use that to create the partial - least square biplots of the top 4 most contributing variables
+Gini<-randomForest::importance(b2, class = "SNAKE")
+Gini<-data.frame(Gini)
+Habitat_Variables <- c("Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover","Woody Stem Height", "Cover Height", "Distance To Cover","Distance To Water", "Water Depth", "Percent Water", "Percent Woody Debris", "Percent Floating Vegetation", "Percent Bare Soil", "Mean Temperature")
+
+D<-cbind(Habitat_Variables,Gini)
+
+G<-ggplot(D, aes( x = reorder(Habitat_Variables, MeanDecreaseGini), y=MeanDecreaseGini))+
+  geom_col(width = .4)+
+  ylim(0,25)+
+  coord_flip()+
+  xlab("Environmental Variables")+
+  ylab("Relative Importance (%)")+
+  theme_bw()
+
+#Partial Dependence Plot
+w<-partialPlot(b2, train, Dist..To.Water, "SNAKE", plot = FALSE)
+x<-partialPlot(b2, train, Depth, "SNAKE", plot = FALSE)
+y<-partialPlot(b2, train, Canopy.Closure, "SNAKE", plot = FALSE)
+z<-partialPlot(b2, train, X.Bare.soil, "SNAKE", plot =FALSE)
+
+
+#Distance to Water
+w<-cbind(w$x,w$y)
+w<-data.frame(w)
+names(w)<-c("x","y")
+
+w1<-ggplot(data = w, aes(x,y))+
+  geom_line(size = 1)+
+  xlab("Distance to Water (cm)")+
+  ylab("Relative probability")+
+  geom_text(aes(1000,0.40), label = paste("A"), col = "black")+
+  ylim(-0.8, 0.6)+
+  xlim(0,1000)+
+  theme_bw()
+
+#Depth
+
+x<-cbind(x$x,x$y)
+x<-data.frame(x)
+names(x)<-c("x","y")
+
+x1<-ggplot(data = x, aes(x,y))+
+  geom_line(size = 1)+
+  xlab("Water Depth (cm)")+
+  ylab("Relative probability")+
+  geom_text(aes(80,0.23), label = paste("B"), col = "black")+
+  theme_bw()
+
+y<-cbind(y$x,y$y)
+y<-data.frame(y)
+names(y)<-c("x","y")
+
+y1<-ggplot(data = y, aes(x,y))+
+  geom_line(size = 1)+
+  xlab("Canopy Closure (%)")+
+  ylab("Relative probability")+
+  geom_text(aes(100,0.47), label = paste("C"), col = "black")+
+  theme_bw()
+
+#Z. Bares Soil
+z<-cbind(z$x,z$y)
+z<-data.frame(z)
+names(z)<-c("x","y")
+
+z1<-ggplot(data = z, aes(x,y))+
+  geom_line(size = 1)+
+  xlab("Bare Soil Cover (%)")+
+  ylab("Relative probability")+
+  geom_text(aes(100, 0.17), label = paste("D"), col = "black")+
+  theme_bw()
+```
+
+```{r Variable importance Plot, fig.width=8}
+G+
+  theme_bw(base_size = 12)
+```
+**Figure 3:**The Relative Importance (based on the Mean decrease in Gini) on the environmental variables from the Maximum Random Forest model on Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
+
+```{r Partial Dependance Plots, message=FALSE, warning=FALSE}
+grid.arrange(w1,x1,y1,z1, ncol= 2)+
+  theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
+```
+**Figure 4:** Partial dependance plots of the four most constributing variables (From mean decrease in gini) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Water depth (A), distance to water (B), canopy closure (C), and  percent bare soil (D) were measured within and above a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
+
+# **Discussion**
+
+Cottonmouths are pretty generalist, manly sticking to the swamp, but can be found in the terrestrial zones of the study area. Also, there is a presence of an ontogenetic shift in both terrestrial to wetland habitat, as well as being near more cover objects.
+
+# **References** 
+Anderson, M. J. 2017. Permutational Multivariate Analysis of Variance (PERMANOVA). Wiley StatsRef: Statistics Reference Online:1–15. 
+
+Anderson, M. J., K. E. Ellingsen, and B. H. McArdle. 2006. Multivariate dispersion as a measure of beta diversity. Ecology Letters 9:683–693. 
+
+Archer, K. J., and R. V. Kimes. 2008. Empirical characterization of random forest variable importance measures. Computational Statistics and Data Analysis 52:2249–2260. 
+
+Assis, J., B. Claro, A. Ramos, J. Boavida, and E. A. Serrão. 2013. Performing fish counts with a wide-angle camera, a promising approach reducing divers’ limitations. Journal of Experimental Marine Biology and Ecology 445:93–98. 
+
+Blanchard, F, N., and B. Finister, E. 1933. A method of marking living snakes for future recognition, with a discussion of some problems and results. Ecology 14:334–347. 
+
+Breiman, L. 2001. Random Forest. Machine Learning 45:5–32. 
+
+Breiman, L., A. Cutler, A. Liaw, and M. Wiener. 2018. Breiman and Cutler’s Random Forests for Classification and Regression “randomForest.” CRAN. 
+
+Brückner, A., and M. Heethoff. 2017. A chemo-ecologists’ practical guide to compositional data analysis. Chemoecology 27:33–46. 
+
+Burkett, Ray, D. 1966. Natural history of cottonmouth moccasin, <i>Agkistrodon piscivorus<i/> (Reptilia). University of Kansas Publications 17:435–491. 
+
+Cutler, D. R., T. C. Edwards, K. H. Beard, A. Cutler, T. Kyle, J. Gibson, J. J. Lawler, H. Beard, and T. Hess. 2007. Random Forests for Classification in Ecology Published by : Ecological Society of America. Ecology 88:2783–2792. 
+
+Delgado-Baquerizo, M., A. Gallardo, F. Covelo, A. Prado-Comesaña, V. Ochoa, and F. T. Maestre. 2015. Differences in thallus chemistry are related to species-specific effects of biocrust-forming lichens on soil nutrients and microbial communities. Functional Ecology 29:1087–1098. 
+
+Dormann, C. F., J. Elith, S. Bacher, C. Buchmann, G. Carl, G. Carré, J. R. G. Marquéz, B. Gruber, B. Lafourcade, P. J. Leitão, T. Münkemüller, C. Mcclean, P. E. Osborne, B. Reineking, B. Schröder, A. K. Skidmore, D. Zurell, and S. Lautenbach. 2013. Collinearity: A review of methods to deal with it and a simulation study evaluating their performance. Ecography 36:027–046. 
+
+Eskew, E. A., J. D. Willson, and C. T. Winne. 2009. Ambush site selection and ontogenetic shifts in foraging strategy in a semi-aquatic pit viper, the Eastern cottonmouth. Journal of Zoology 277:179–186. 
+
+Frakes, R. A., R. C. Belden, B. E. Wood, and F. E. James. 2015. Landscape analysis of adult Florida panther habitat. PLoS ONE 10:1–18. 
+
+Guttman, L. 1954. Some necessary conditions for common-factor analysis. Psychometrika 19:149–161. 
+
+Hirzel, A. H., J. Hausser, D. Chessel, and N. Perrin. 2002. Ecological-niche factor analysis: How to compute habitat-suitability maps without absence data? Ecology 83:2027–2036. 
+
+Koons, D. N., R. D. Birkhead, S. M. Boback, M. I. Williams, and M. P. Greene. 2009. The effect of body size on cottonmouth (Agkistrodon piscivorus) survival, recapture probability, and behavior in an Alabama swamp. Herpetological Conservation and Biology 4:221–235. 
+
+Murphy, M. A., J. S. Evans, and A. Storfer. 2010. Quantifying Bufo boreas connectivity in Yellowstone National Park with landscape genetics. Ecology 91:252–261. 
+
+Oksanen, J., M. Guillaume - Blanchet, F. Friendly, R. Kindt, P. Legendre, D. McGlinn, P. R. Minchin, R. B. O’Hara, G. L. Simpson, P. Solymos, M. Henry, H. Stevens, E. Szoecs, and H. Wagner. 2019. Community Ecology Package “vegan.” CRAN. 
+
+Pape, R., and J. Löffler. 2015. Seasonality of habitat selection shown to buffer alpine reindeer pastoralism against climate variability. Ecosphere 6:1–18. 
+
+Peres-Neto, P. R., D. A. Jackson, and K. M. Somers. 2003. Giving meaningful interpretation to ordination axes: Assessing loading significance in principal component analysis. Ecology 84:2347–2363. 
+
+Peres-Neto, P. R., D. A. Jackson, and K. M. Somers. 2005. How many principal components? stopping rules for determining the number of non-trivial axes revisited. Computational Statistics and Data Analysis 49:974–997. 
+
+Severson, J. P., C. A. Hagen, J. D. Maestas, D. E. Naugle, J. T. Forbes, and K. P. Reese. 2017. Effects of conifer expansion on greater sage-grouse nesting habitat selection. Journal of Wildlife Management 81:86–95. 
+
+Smith, N. 2009. Studies on selected aspects of the life history of the Western Cottonmouth ( Akgistrodon piscivorus leucostoma) along the Cumberland River Bicentennial Trail, Ashland City, Tennessee. Unpublished M.S. Thesis, Austin Peay State University, Clarksville, Tennessee.
