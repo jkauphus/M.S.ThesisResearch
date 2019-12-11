@@ -5,10 +5,11 @@
 # Folders
 
 data/
-
+Thesis_files/
 # Session Data files
 .RData
 *.R
+*.nb.html
 
 # Example code in package build process
 *-Ex.R
