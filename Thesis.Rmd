@@ -22,8 +22,9 @@ output:
 ```{r Library, include=FALSE}
 packages<-c("adehabitatHR","ggmap","dismo","rgbif","rdryad","utils","readxl","ggridges","viridis","rasterVis","maps","mapdata","raster",
 "rasterImage", "data.table","ggfortify","grid","move","moveVis","OpenStreetMap","pbapply","plotly",
-"rgdal","sp","tidyverse", "dplyr", "ggplot2", "factoextra", "FactoMineR", "tidyr", "knitr", "gridExtra", "lattice", "permute", "vegan", "RVAideMemoire", "MASS", "caret", "tmap", "tmaptools", "ggsn", "leaflet", "sf", "sp", "ggmap", "randomForest", "randomForestExplainer", "rfUtilities", "faraway", "ROCR", "formattable", "kableExtra", "cowplot", "ggforce", "ggrepel", "ggExtra")
+"rgdal","sp","tidyverse", "dplyr", "ggplot2", "factoextra", "FactoMineR", "tidyr", "knitr", "gridExtra", "lattice", "permute", "vegan", "RVAideMemoire", "MASS", "caret", "tmap", "tmaptools", "ggsn", "leaflet", "sf", "sp", "ggmap", "randomForest", "randomForestExplainer", "rfUtilities", "faraway", "ROCR", "formattable", "kableExtra", "cowplot", "ggforce", "ggrepel", "ggExtra", "gt", "glue")
 sapply(packages, require, character.only=T)
+
 ```
 
 # **Abstract**
@@ -102,7 +103,7 @@ Data was collected along the Cumberland River Bicentennial Trail (CRBT), Cheatha
 
 The habitat types found within the study area are the buttonbush slough in the central portion (12.6 ha), characterized by relatively open canopy, deeper water (50-150 cm), and mats of floating vegetation (Hydrocotyle ranunculoides & Ludwigia palustris) scattered throughout the slough. An open water habitat (> 100cm) is located toward the western portion of the study area. The seasonally flooded lowland forest (20.9 ha), dominated by red maples (Acer rubrum), has the denser canopy closure for the wetland, and is located between the slough and upland forest. Toward the southern portion between the slough and crop fields is a transitional edge area (15.4 ha) dominated by dense grass vegetation and occasionally floods (<10cm) in some portions throughout the year.  The upland forest habitat (16.3 ha) was dominated by oak trees (Quercus sp.) and had dense canopy closure and higher percentage of bare soil. Three main streams flow into the slough from the upland forest and provide a permanent source of water to the slough, along with periodic flooding from the Cumberland River, and groundwater seepage. A constructed levee divides the slough from adjacent crop fields, and during the fall waterfowl hunt, a culvert is opened from the levee to reduce the flooded areas. 
 
-```{r Interactive Ploty Map, fig.width = 8, fig.height = 8, message=FALSE, warning=FALSE, cache = TRUE}
+```{r Interactive Ploty Map,  message=FALSE, warning=FALSE, cache = TRUE}
 #Setting Up Coordinates
 
 coord<-cbind(study$UTM_mE, study$UTM_mN)
@@ -170,15 +171,17 @@ study$`results$Land_Classification`[study$`results$Land_Classification`>11 & stu
 study$`results$Land_Classification`[study$`results$Land_Classification`>=90 & study$`results$Land_Classification`<= 95]<- "Wetland"
 ```
 
-```{r Mapping NLCD, fig.height=8, fig.width=10}
+```{r Mapping NLCD}
 rast<-rasterToPoints(landcover)
 rast<-data.frame(rast)
 colnames(rast)<-c("X","Y", "Landcover")
 b.rast<-seq(min(rast$Landcover), max(rast$Landcover), length.out = 30)
-
+rast$Landcover<-as.character(rast$Landcover)
+ 
 ggplot()+
 geom_raster(data = rast,aes(X, Y, fill = Landcover))+
-  scale_fill_gradientn(colours= c("light blue", "forestgreen","forestgreen","forestgreen","forestgreen", "Dark blue"))+
+  scale_fill_manual(values= c("light blue", "forestgreen","forestgreen","forestgreen","forestgreen","forestgreen","forestgreen",
+                               "forestgreen","forestgreen","forestgreen","forestgreen","forestgreen","forestgreen","Dark blue", "Dark blue"))+
   geom_point(data = snake, aes(x,y), size = 2)+
   coord_fixed(xlim = c(min(habitat$x),max(habitat$x)), ylim = c(min(habitat$y),max(habitat$y)))+
   theme(panel.border = element_rect(colour = "black", fill = NA, size = 1))+
@@ -189,7 +192,7 @@ geom_raster(data = rast,aes(X, Y, fill = Landcover))+
 ```
 
 
-**Map 3:** The USGS: National Land Cover Dataset of 2011 downloaded from the Google Earth Engine (https://developers.google.com/earth-engine/datasets/catalog/USGS_NLCD). Cottonmouth locations are identified by the black points on the map.
+**Map 3:** The USGS: National Land Cover Dataset of 2011 downloaded from the Google Earth Engine. CLassification definitions can be found at (https://developers.google.com/earth-engine/datasets/catalog/USGS_NLCD). Cottonmouth locations are identified by the black points on the map.
 
 ## Analysis of Habitat Selection: Ecological Niche 
 
@@ -335,6 +338,7 @@ p<-ggplot(data = s1, aes(Comp.1, Comp.2))+
   theme(legend.position=c(0.875, 0.85), legend.background = element_rect(fill="White",
       size=0.5))
 ```
+**Table 1:** Factor loadings from principal component analysis of environmental variables measured for cottonmouths and general habitat comparitsion sites
 
 ```{r Loadings Table, message=FALSE, warning=FALSE}
 Description<- c("Percentage of canopy above quadrat", "Coverage within quadrat","Coverage within quadrat","Coverage within quadrat","Coverage within quadrat", "Height of largest living woody stem", "Height of cover object closest to snake point", "Distance to nearest cover object", "Diameter of largest log within quadrat", "Distance to nearest water source", "Water depth measured within quadrat", "Coverage within quadrat","Coverage within quadrat","Coverage within quadrat", "Coverage within quadrat","Mean temperature within quadrat", "", "")
@@ -349,19 +353,29 @@ loadings<-round(loadings, digits = 3)
 names(loadings)<-c("PC-1", "PC-2", "PC-3")
 loadings<-cbind(Description, loadings)
 
-row.names(loadings)<-c("Canopy Closure (%)", "Rock Cover (%)", "Leaf Cover (%)", "Vegetative Cover (%)", "Fallen Log Cover (%)","Woody Stem Height (cm)", "Cover Height (cm)", "Distance To Cover (cm)","Log Diameter (cm)", "Distance To Water (cm)", "Water Depth (cm)", "Percent Water (%)", "Percent Woody Debris (%)", "Percent Floating Vegetation (%)", "Percent Bare Soil (%)", "Mean Temperature (°C)", "Eigenvalue", "Explained Variance")
+row.names(loadings)<-c("Canopy Closure (%)", "Rock Cover (%)", "Leaf Cover (%)", "Vegetative Cover (%)", "Fallen Log Cover (%)","Woody Stem Height (cm)", "Cover Height (cm)", "Distance To Cover (cm)","Log Diameter (cm)", "Distance To Water (cm)", "Water Depth (cm)", "Percent Water (%)", "Percent Woody Debris (%)", "Percent Floating Vegetation (%)", "Percent Bare Soil (%)", "Mean Temperature (C)", "Eigenvalue", "Explained Variance")
 
-kable(loadings, row.names = TRUE,digits = 3, col.names = c("Description", "PC-1", "PC-2", "PC-3"), align = "l", booktabs = T, caption = "Factor loadings from principal component analysis of environmental variables measured for cottonmouths and general habitat comparitsion sites")%>%
-  kable_styling(c("striped", "bordered"))%>%
-  pack_rows("",17,18,latex_gap_space = "2em")
+gt(loadings, rownames_to_stub = TRUE, )%>%
+  tab_stubhead(label = "Variable (units)")%>%
+  cols_label(
+    Description = "Description",
+    Comp.1 = "PC-1",
+    Comp.2 = "PC-2",
+    Comp.3 = "PC-3")%>%
+  tab_row_group( group = "",
+    rows = 1:16
+  )%>%
+  tab_row_group(
+    group = "PCA Statistics",rows = c(17,18))
+
 ```
 
 ```{r CowPLot, echo=TRUE, fig.height=8, fig.width=12, message=FALSE, warning=FALSE}
 xdens<-axis_canvas(p, axis = "x")+
-geom_density(data =group, aes(Comp.1, fill = group$Group), alpha = 0.5, size =.2)
+geom_density(data =group, aes(Comp.1, fill = group$Group), alpha = 0.3, size =.2)
 
 ydens<-axis_canvas(p, axis = "y", coord_flip = TRUE)+
-geom_density(data =group, aes(Comp.2, fill = group$Group), alpha = 0.5, size =.2)+
+geom_density(data =group, aes(Comp.2, fill = group$Group), alpha = 0.3, size =.2)+
   coord_flip()
 
 p1<-insert_xaxis_grob(p, xdens, grid::unit(0.2, "null"), position= "top")
@@ -372,6 +386,7 @@ ggdraw(p2)
 
 **Figure 1:** Principal component analysis of the environmental variables measured for the *A. piscivorus* (cottonmouth) and general available habitat selected comparison sites. Ellipses represent 95% condifence intervals for cottonmouths (grey) and general habitat (black). Mean principal component scores of the intra-specific cottonmouth groups (adult males, adult females, juveniles,  & young of the year [YOY]) plotted. Positive values for PC-1 indicate non-flooded areas with a greater distance from flooded areas, and positive PC-2 values indicate areas with higher thermal sites. Density counts for the cottonmouth conspecifics represented for each PC score, with PC-1 cottonmouth group density above the plot, and PC-2 cottonmouth group density toward the right of the plot.
 
+**Table 2:** Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.
 ```{r PERMANOVA/PERMDISP Table, fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
 #PERMANOVA
 Perm1<-adonis(s1[,c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,22)]~ Type, data = s1, method='eu')
@@ -387,10 +402,20 @@ PermDisp<- cbind(Perm1, bd1)
 names(PermDisp)<-c("Pseudo-F", "P", "F", "P ")
 row.names(PermDisp)<-c("Proportions (Euclidean)")
 
-kable(PermDisp, digits = 8, caption = "Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.")%>%
-  kable_styling(c("striped", "bordered"))%>%
-  add_header_above(c(" " = 1, "PERMANOVA" = 2, "PERMDISP" = 2))%>%
-  footnote(general = "N(permutations) = 999; df = 1")
+gt(PermDisp, rownames_to_stub = TRUE)%>%
+  fmt_number(columns = c(1,3),
+             decimals = 2,
+             suffixing = T)%>%
+    fmt_scientific(columns = c(2,4),
+             decimals = 2)%>%
+  tab_spanner(
+    label = "PERMANOVA", columns = 1:2)%>%
+  tab_spanner(
+    label = "PERMDISP", columns = 3:4)%>%
+  tab_source_note(
+    source_note = "N(permutations) = 999")%>%
+  tab_source_note(
+    source_note = "df = 1")
 ```
 
 ## Habitat Selection: Intra-specific Differences 
