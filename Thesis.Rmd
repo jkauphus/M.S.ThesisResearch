@@ -424,6 +424,7 @@ The ANOVA test on the principal component scores investigating intra-specific ha
 
 Linear regression comparing PC-1 and body size (SVL) found a significant negative correlation (F = 3.29; P <0.01; d.f. = 1; Fig 2), indicating that larger individuals were found in more flooded habitat sites compared to smaller individuals. Caution must be used in interpreting the results as this relationship as it had a low explanatory power in PC-1 (19.6%) and R2 (0.03) value.
 
+**Table 3:**Mean component scores of PCA on intra-specific habitat selection within cottonmouths with ANOVAs used to compare groups
 ```{r ANOVA Table, message=FALSE, warning=FALSE}
 pcomp<-pcomp[,2:4]
 names(pcomp)<- c( "PC-1","PC-2", "PC-3")
@@ -442,11 +443,14 @@ names(stats)<-c( "PC-1","PC-2", "PC-3")
 pcomp<-rbind(pcomp,stats)
 
 row.names(pcomp)<-c("Female", "Juvenile", "Male", "YOY", "F", "P-value")
+gt(pcomp, rownames_to_stub = TRUE)%>%
+  tab_stubhead(label = "Cottonmouth conspecific")%>%
+  tab_row_group( group = "",
+    rows = 1:4
+  )%>%
+  tab_row_group(
+    group = "ANOVA",rows = c(5,6))
 
-kable(pcomp, row.names = TRUE, col.names=c( "PC-1","PC-2", "PC-3"),digits = 3, align = "l", caption = "Mean component scores of PCA on intra-specific habitat selection within 
-      cottonmouths with ANOVAs used to compare groups.")%>%
-  kable_styling(c("striped", "bordered"))%>%
-  pack_rows("ANOVA", 5,6,latex_gap_space = "2em")
 ```
 
 ```{r Tukey HSD, message=FALSE, warning=FALSE}
@@ -605,14 +609,26 @@ AUC<-t(data.frame(lapply(files, AUC)))
 AUC<-c(max(AUC), mean(AUC), min(AUC))
 ```
 
+**Table 4:** Performance metrics for the 30-iteration random forest model on cottonmouth habitat selection compared to general habitat available within the study area.
 ```{r Random Forest Table}
 models<-cbind(RandomForest_Model, cv_table, OOB, AUC)
+gt(models)%>%
+  cols_label(
+    RandomForest_Model = "Random Forest Models",
+    X1 = "Accuracy",
+    X2 = "Kappa",
+    X3 = "Sensitivity",
+    X4 = "Specificity")%>%
+  fmt_number(columns = c(2,3,4,5,6,7),
+             decimals = 3,
+             suffixing = T)%>%
+  tab_source_note(
+    source_note = "N(trees) = 6000")%>%
+  tab_source_note(
+    source_note = "OOB = Out of Bag Accuracy")%>%
+    tab_source_note(
+    source_note = "AUC = Area Under the Curve")
 
-kable(models, row.names = FALSE, col.names=c("Random Forest Model", "Accuracy", "Kappa", "Sensitivity", "Specificity", "OOB", "AUC"),digits = 3, caption = "Performance metrics for the 30-iteration random forest model on cottonmouth habitat selection compared to general habitat available within the study area.")%>%
-  kable_styling(c("striped", "bordered"))%>%
-  footnote(general = "N(trees) = 6000;",
-           "OOB = Out of Bag Accuracy",
-           "AUC = Area Under the Curve")
 ```
 
 ```{r Variable Importance, include=FALSE}
@@ -647,7 +663,6 @@ w1<-ggplot(data = w, aes(x,y))+
   geom_line(size = 1)+
   xlab("Distance to Water (cm)")+
   ylab("Relative probability")+
-  geom_text(aes(1000,0.40), label = paste("A"), col = "black")+
   ylim(-0.8, 0.6)+
   xlim(0,1000)+
   theme_bw()
@@ -662,7 +677,6 @@ x1<-ggplot(data = x, aes(x,y))+
   geom_line(size = 1)+
   xlab("Water Depth (cm)")+
   ylab("Relative probability")+
-  geom_text(aes(80,0.23), label = paste("B"), col = "black")+
   theme_bw()
 
 y<-cbind(y$x,y$y)
@@ -673,7 +687,6 @@ y1<-ggplot(data = y, aes(x,y))+
   geom_line(size = 1)+
   xlab("Canopy Closure (%)")+
   ylab("Relative probability")+
-  geom_text(aes(100,0.47), label = paste("C"), col = "black")+
   theme_bw()
 
 #Z. Bares Soil
@@ -685,7 +698,6 @@ z1<-ggplot(data = z, aes(x,y))+
   geom_line(size = 1)+
   xlab("Bare Soil Cover (%)")+
   ylab("Relative probability")+
-  geom_text(aes(100, 0.17), label = paste("D"), col = "black")+
   theme_bw()
 ```
 
@@ -699,6 +711,8 @@ G+
 ```{r Partial Dependance Plots, message=FALSE, warning=FALSE}
 grid.arrange(w1,x1,z1,y1, ncol= 2)+
   theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
+
+plot_grid(w1, x1,z1,y1, labels=c("A)", "B)", "C)","D)"), ncol = 2, nrow = 2)
 ```
 
 **Figure 4:** Partial dependance plots of the four most constributing variables (From mean decrease in gini) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Water depth (A), distance to water (B), canopy closure (C), and  percent bare soil (D) were measured within and above a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
