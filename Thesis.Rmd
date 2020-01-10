@@ -14,6 +14,7 @@ output:
       fig_width: 12
       html_document:
       code_folding: "hide"
+      
 ---
 
 <center>![Fulbright,2013](data/Spring cottonmouth .jpg){width=70%}</center>
@@ -22,9 +23,8 @@ output:
 ```{r Library, include=FALSE}
 packages<-c("adehabitatHR","ggmap","dismo","rgbif","rdryad","utils","readxl","ggridges","viridis","rasterVis","maps","mapdata","raster",
 "rasterImage", "data.table","ggfortify","grid","move","moveVis","OpenStreetMap","pbapply","plotly",
-"rgdal","sp","tidyverse", "dplyr", "ggplot2", "factoextra", "FactoMineR", "tidyr", "knitr", "gridExtra", "lattice", "permute", "vegan", "RVAideMemoire", "MASS", "caret", "tmap", "tmaptools", "ggsn", "leaflet", "sf", "sp", "ggmap", "randomForest", "randomForestExplainer", "rfUtilities", "faraway", "ROCR", "formattable", "kableExtra", "cowplot", "ggforce", "ggrepel", "ggExtra", "gt", "glue")
+"rgdal","sp","tidyverse", "dplyr", "ggplot2", "factoextra", "FactoMineR", "tidyr", "knitr", "gridExtra", "lattice", "permute", "vegan", "RVAideMemoire", "MASS", "caret", "tmap", "tmaptools", "ggsn", "leaflet", "sf", "sp", "ggmap", "randomForest", "randomForestExplainer", "rfUtilities", "faraway", "ROCR", "formattable", "kableExtra", "cowplot", "ggforce", "ggrepel", "ggExtra", "gt", "glue", "Boruta", "pdp")
 sapply(packages, require, character.only=T)
-
 ```
 
 # **Abstract**
@@ -239,64 +239,6 @@ rf<-s
 #Correlation Check
 corrrel<-cor(rf[,c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,22)])
 findCorrelation(corrrel, cutoff = 0.7)
-
-#Drop Column Feature Importance
-RF<-randomForest(Type~.,rf, ntree= 10000)
-RF
-#BASE MODEL = 15.19
-#Removed Canopy
-RF<-randomForest(Type~.,rf[,c(1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed Rock
-RF<-randomForest(Type~.,rf[,c(1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF # NO
-#Removed Leaf
-RF<-randomForest(Type~.,rf[,c(1,2,3,5,6,7,8,9,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed Veg
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,6,7,8,9,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed Fallen Log
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,7,8,9,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed WSH
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,8,9,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed CoverHeight
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF #Tied at 15.19
-#Removed Distance to Cover
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed Log Diameter
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17)], ntree= 10000)
-RF #YES Improved - 14.56
-#Removed Distance to Water
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed Depth
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,10,11,13,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed X.Water
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,10,11,12,14,15,16,17)], ntree= 10000)
-RF #NO
-#Removed Woody Debris
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,17)], ntree= 10000)
-RF #NO
-#Removed Floating
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17)], ntree= 10000)
-RF #NO
-#Removed Bare
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17)], ntree= 10000)
-RF #NO
-#Removed Temp
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)], ntree= 10000)
-RF #NO
-
-#REMOVED Log Diameter from the Feature Selection
-RF<-randomForest(Type~.,rf[,c(1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17)], ntree= 10000)
-RF
-randomForest::importance(RF)
 ```
 
 ```{r PCA, fig.height=9, fig.width=10, message=FALSE, warning=FALSE}
@@ -321,9 +263,9 @@ pcomp<-group_by(group, Group)%>%
 
 #Plot
 p<-ggplot(data = s1, aes(Comp.1, Comp.2))+
-  geom_point(alpha = 0.5, size = 1.5)+
+  geom_point(alpha = 0.75, size = 2, color = "black")+
   geom_point(data = pcomp, aes(pcomp$Comp.1, pcomp$Comp.2, color = Group, shape = Group), size = 5)+
-  scale_shape(solid = F)+
+  scale_shape(solid = T)+
   theme_bw(base_size = 24)+
   theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))+
   geom_hline(yintercept = 0, lty = 2) +
@@ -334,8 +276,8 @@ p<-ggplot(data = s1, aes(Comp.1, Comp.2))+
   geom_text(aes(1.5,4), label = paste("Cottonmouth"), col = "#636363", size = 9)+
   geom_text(aes(-5,1.5), label = paste("General"), col = "black", size = 9)+
   xlab(expression(atop("aquatic sites" %<->% "terrestrial sites", paste("PC-1 (22.6%)" ))))+
-  ylab(expression(atop ("PC-2 (11.8%)", paste("lower available cover " %<->% "higher avaliable cover"))))+
-  theme(legend.position=c(0.875, 0.85), legend.background = element_rect(fill="White",
+  ylab(expression(atop ("PC-2 (11.8%)", paste("low cover " %<->% "high cover"))))+
+  theme(legend.position=c(0.875, 0.81), legend.background = element_rect(fill="White",
       size=0.5))
 ```
 **Table 1:** Factor loadings from principal component analysis of environmental variables measured for cottonmouths and general habitat comparitsion sites
@@ -346,11 +288,11 @@ Description<- c("Percentage of canopy above quadrat", "Coverage within quadrat",
 loadings<-pc$loadings[,1:3]
 sdev<-t(data.frame(pc$sdev))
 eigen<-sdev[,1:3]
-
 Variance<-c(22.60, 11.81, 9.27)
 loadings<-rbind(loadings, eigen, Variance)
 loadings<-round(loadings, digits = 3)
 names(loadings)<-c("PC-1", "PC-2", "PC-3")
+loadings<-round(loadings, digits = 3)
 loadings<-cbind(Description, loadings)
 
 row.names(loadings)<-c("Canopy Closure (%)", "Rock Cover (%)", "Leaf Cover (%)", "Vegetative Cover (%)", "Fallen Log Cover (%)","Woody Stem Height (cm)", "Cover Height (cm)", "Distance To Cover (cm)","Log Diameter (cm)", "Distance To Water (cm)", "Water Depth (cm)", "Percent Water (%)", "Percent Woody Debris (%)", "Percent Floating Vegetation (%)", "Percent Bare Soil (%)", "Mean Temperature (C)", "Eigenvalue", "Explained Variance")
@@ -367,7 +309,6 @@ gt(loadings, rownames_to_stub = TRUE, )%>%
   )%>%
   tab_row_group(
     group = "PCA Statistics",rows = c(17,18))
-
 ```
 
 ```{r CowPLot, echo=TRUE, fig.height=8, fig.width=12, message=FALSE, warning=FALSE}
@@ -395,6 +336,7 @@ Perm1<-cbind(Perm1$aov.tab[1,4], Perm1$aov.tab[1,6])
 #PERMDISP
 dist<-dist(scale(s1[,c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,22)]))
 bd<-anova(betadisper(dist,s1$Type))
+betadisper(dist,s1$Type)
 bd1<-cbind(bd$`F value`, bd$`Pr(>F)`)
 bd1<-data.frame(bd1)
 bd1<-bd1[-2,]
@@ -424,7 +366,8 @@ The ANOVA test on the principal component scores investigating intra-specific ha
 
 Linear regression comparing PC-1 and body size (SVL) found a significant negative correlation (F = 3.29; P <0.01; d.f. = 1; Fig 2), indicating that larger individuals were found in more flooded habitat sites compared to smaller individuals. Caution must be used in interpreting the results as this relationship as it had a low explanatory power in PC-1 (19.6%) and R2 (0.03) value.
 
-**Table 3:**Mean component scores of PCA on intra-specific habitat selection within cottonmouths with ANOVAs used to compare groups
+**Table 3:**Mean component scores of PCA on intra-specific habitat selection within cottonmouths with ANOVAs used to compare conspecific groups.
+
 ```{r ANOVA Table, message=FALSE, warning=FALSE}
 pcomp<-pcomp[,2:4]
 names(pcomp)<- c( "PC-1","PC-2", "PC-3")
@@ -443,6 +386,8 @@ names(stats)<-c( "PC-1","PC-2", "PC-3")
 pcomp<-rbind(pcomp,stats)
 
 row.names(pcomp)<-c("Female", "Juvenile", "Male", "YOY", "F", "P-value")
+pcomp<-round(pcomp, digits = 3)
+
 gt(pcomp, rownames_to_stub = TRUE)%>%
   tab_stubhead(label = "Cottonmouth conspecific")%>%
   tab_row_group( group = "",
@@ -450,7 +395,6 @@ gt(pcomp, rownames_to_stub = TRUE)%>%
   )%>%
   tab_row_group(
     group = "ANOVA",rows = c(5,6))
-
 ```
 
 ```{r Tukey HSD, message=FALSE, warning=FALSE}
@@ -462,13 +406,14 @@ TukeyHSD(C2)
 TukeyHSD(C3)
 ```
 
-```{r Linear Regression, fig.height=6, fig.width=14, message=FALSE, warning=FALSE}
+```{r Linear Regression, fig.height=8, fig.width=15, message=FALSE, warning=FALSE}
 #Linear Regression
 mod<-lm(SVL~Comp.1,group)
 mod2<-lm(SVL~Comp.2,group)
+mod3<-lm(SVL~Comp.3,group)
 
 LR1<-ggplot(group, aes(x= SVL, y= Comp.1))+
-  geom_point(size = 2, aes(shape = Group))+
+  geom_point(size = 2)+
   xlim(209, 1061)+
   geom_smooth(method = "lm", color= "black")+
   geom_hline(yintercept = 0, lty = 2) +
@@ -482,7 +427,7 @@ LR1<-ggplot(group, aes(x= SVL, y= Comp.1))+
   theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
 
 LR2<-ggplot(group, aes(x= SVL, y= Comp.2))+
-  geom_point(size = 2, aes(shape = Group))+
+  geom_point(size = 2)+
   xlim(209, 1061)+
   geom_smooth(method = "lm", color= "black")+
   geom_hline(yintercept = 0, lty = 2) +
@@ -495,7 +440,21 @@ LR2<-ggplot(group, aes(x= SVL, y= Comp.2))+
   guides(shape = "none")+
   theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
 
-plot_grid(LR1, LR2, labels=c("A)", "B)"), ncol = 2, nrow = 1)
+LR3<-ggplot(group, aes(x= SVL, y= Comp.3))+
+  geom_point(size = 2)+
+  xlim(209, 1061)+
+  geom_smooth(method = "lm", color= "black")+
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_vline(xintercept = 600, lty = 2)+
+  theme_bw(base_size = 24)+
+  geom_text(aes(900, 6, label = paste("R-squared = 0.045")), color="black")+
+  geom_text(aes(900, 5.4, label = paste("F= 0.47; P= 0.49")), color = "black")+
+  xlab("Snout-vent length (mm)")+
+  ylab(expression(atop("low vegetation" %<->% "high vegetation", paste("PC-3 (9.2%)" ))))+
+  guides(shape = "none")+
+  theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
+
+plot_grid(LR1, LR2, LR3, labels=c("A)", "B)", "C)"), ncol = 3, nrow = 1)
 ```
 
 **Figure 2 A & B:** Linear regression of Principal Component scores for the comparison of habitat selection among the intra-specific cottonmouth groups(Males, Females, Juveniles, and YOY) and their snout-vent lengths.
@@ -506,9 +465,17 @@ Prior to developing the Random Forest models, we used a tested multicollinearity
 
 Our maximum-accuracy RF model identified that distance to water (cm), water depth (cm), percent bare soil (%), and percent water (%) were the most important predictors in identifying the occurrence of a cottonmouth within an area. The medium importance environmental variables were canopy closure (%), distance to a cover object (%), and percent floating vegetation (%). To clarify, the important predictor variables validate cottonmouths strong association to swamp habitat. Partial dependence found that the probability of occurrence of a cottonmouth was negatively related to site distance from a water source (Fig 4A). Response to water depth sharply increased from 0 – 20 cm and then decreased in occurrence as depth increased past 25 cm (Fig 4B). Response to water cover increased in occurrence and then plateaued past 10% cover and the response to bare soil cover increased up to 30% and then slightly declined in cottonmouth occurrence (Fig 4 C & D).
 
-```{r Feature Selected for RF Model}
+```{r Feature Selection, message=FALSE, warning=FALSE, include=FALSE}
 rf<-s1[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,22)]
+set.seed(111)
+#Model Improvement Metric
+RF<-randomForest(Type~.,rf, ntree= 10000)
 
+boruta<-Boruta(Type~., rf, doTrace = 2, maxRuns = 500)
+plot(boruta, las = 2, cex.axis = 0.7)
+```
+
+```{r 10-fold cross validation}
 #Setting up Cross Validation Training and Validation sets
 set.seed(123)
 ind<-sample(2,nrow(rf),replace = T, prob = c(0.9,0.1))
@@ -516,38 +483,38 @@ train<-rf[ind==1,]
 test<-rf[ind==2,]
 ```
 
-```{r 30 iterations, echo=TRUE}
+```{r 30 iterations, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
 set.seed(111)
-a1<- randomForest(Type~., data = train, ntree = 6000)
-a2<- randomForest(Type~., data = train, ntree = 6000)
-a3<- randomForest(Type~., data = train, ntree = 6000)
-a4<- randomForest(Type~., data = train, ntree = 6000)
-a5<- randomForest(Type~., data = train, ntree = 6000)
-a6<- randomForest(Type~., data = train, ntree = 6000)
-a7<- randomForest(Type~., data = train, ntree = 6000)
-a8<- randomForest(Type~., data = train, ntree = 6000)
-a9<- randomForest(Type~., data = train, ntree = 6000)
-a10<- randomForest(Type~., data = train, ntree = 6000)
-b1<- randomForest(Type~., data = train, ntree = 6000)
-b2<- randomForest(Type~., data = train, ntree = 6000)
-b3<- randomForest(Type~., data = train, ntree = 6000)
-b4<- randomForest(Type~., data = train, ntree = 6000)
-b5<- randomForest(Type~., data = train, ntree = 6000)
-b6<- randomForest(Type~., data = train, ntree = 6000)
-b7<- randomForest(Type~., data = train, ntree = 6000)
-b8<- randomForest(Type~., data = train, ntree = 6000)
-b9<- randomForest(Type~., data = train, ntree = 6000)
-b10<- randomForest(Type~., data = train, ntree = 6000)
-c1<- randomForest(Type~., data = train, ntree = 6000)
-c2<- randomForest(Type~., data = train, ntree = 6000)
-c3<- randomForest(Type~., data = train, ntree = 6000)
-c4<- randomForest(Type~., data = train, ntree = 6000)
-c5<- randomForest(Type~., data = train, ntree = 6000)
-c6<- randomForest(Type~., data = train, ntree = 6000)
-c7<- randomForest(Type~., data = train, ntree = 6000)
-c8<- randomForest(Type~., data = train, ntree = 6000)
-c9<- randomForest(Type~., data = train, ntree = 6000)
-c10<- randomForest(Type~., data = train, ntree = 6000)
+a1<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a2<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a3<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a4<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a5<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a6<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a7<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a8<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a9<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+a10<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b1<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b2<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b3<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b4<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b5<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b6<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b7<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b8<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b9<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+b10<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c1<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c2<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c3<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c4<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c5<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c6<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c7<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c8<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c9<- randomForest(Type~., data = train, ntree = 6000, importance = T)
+c10<- randomForest(Type~., data = train, ntree = 6000, importance = T)
 ```
 
 ```{r Error Rate Plot, eval=FALSE, include=FALSE}
@@ -561,7 +528,6 @@ OOB1<-c(a1$err.rate[6000,1],a2$err.rate[6000,1],a3$err.rate[6000,1],a4$err.rate[
        b3$err.rate[6000,1],b4$err.rate[6000,1],b5$err.rate[6000,1],b6$err.rate[6000,1],b7$err.rate[6000,1],b8$err.rate[6000,1],
        b9$err.rate[6000,1],b10$err.rate[6000,1],c1$err.rate[6000,1],c2$err.rate[6000,1],c3$err.rate[6000,1],c4$err.rate[6000,1],
        c5$err.rate[6000,1],c6$err.rate[6000,1],c7$err.rate[6000,1],c8$err.rate[6000,1],c9$err.rate[6000,1],c10$err.rate[6000,1])
-
 OOB<-c(1-min(OOB1),1-mean(OOB1), 1-max(OOB1))
 ```
 
@@ -610,8 +576,11 @@ AUC<-c(max(AUC), mean(AUC), min(AUC))
 ```
 
 **Table 4:** Performance metrics for the 30-iteration random forest model on cottonmouth habitat selection compared to general habitat available within the study area.
+
 ```{r Random Forest Table}
-models<-cbind(RandomForest_Model, cv_table, OOB, AUC)
+models<-cbind(cv_table, OOB, AUC)
+models<-round(models, digits = 3)
+models<-cbind(RandomForest_Model,models)
 gt(models)%>%
   cols_label(
     RandomForest_Model = "Random Forest Models",
@@ -619,103 +588,84 @@ gt(models)%>%
     X2 = "Kappa",
     X3 = "Sensitivity",
     X4 = "Specificity")%>%
-  fmt_number(columns = c(2,3,4,5,6,7),
-             decimals = 3,
-             suffixing = T)%>%
   tab_source_note(
     source_note = "N(trees) = 6000")%>%
   tab_source_note(
     source_note = "OOB = Out of Bag Accuracy")%>%
     tab_source_note(
     source_note = "AUC = Area Under the Curve")
-
 ```
 
-```{r Variable Importance, include=FALSE}
-#Maximal Model was a1 in the iterations, so I will now use that to create the partial - least square biplots of the top 4 most contributing variables
-Gini<-randomForest::importance(c10, class = "SNAKE")
-Gini<-data.frame(Gini)
+```{r Variable Importance}
+MDA<-randomForest::importance(a8, class = "SNAKE")
+MDA<-data.frame(MDA[,2])
+#Calculating relative importance of MDA
+MDA<-(MDA/63.83)*100
+
+#Plotting
 Habitat_Variables <- c("Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover","Fallen Log Cover","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter","Distance To Water", "Water Depth", "Percent Water", "Percent Woody Debris", "Percent Floating Vegetation", "Percent Bare Soil", "Mean Temperature")
 
-D<-cbind(Habitat_Variables,Gini)
+D<-cbind(Habitat_Variables,MDA)
 
-G<-ggplot(D, aes( x = reorder(Habitat_Variables, MeanDecreaseGini), y=MeanDecreaseGini))+
-  geom_col(width = .4)+
-  ylim(0,25)+
+G<-ggplot(D, aes( x = reorder(Habitat_Variables, D$MDA...2.), y=D$MDA...2.), color = "black")+
+  geom_col(width = .4, fill = "black")+
+  ylim(0,101)+
   coord_flip()+
   xlab("Environmental Variables")+
   ylab("Relative Importance (%)")+
-  theme_bw()
-
-#Partial Dependence Plot
-w<-partialPlot(c10, train, Dist..To.Water, "SNAKE", plot = FALSE)
-x<-partialPlot(c10, train, Depth, "SNAKE", plot = FALSE)
-y<-partialPlot(c10, train, Canopy.Closure, "SNAKE", plot = FALSE)
-z<-partialPlot(c10, train, X.Bare.soil, "SNAKE", plot =FALSE)
-
-
-#Distance to Water
-w<-cbind(w$x,w$y)
-w<-data.frame(w)
-names(w)<-c("x","y")
-
-w1<-ggplot(data = w, aes(x,y))+
-  geom_line(size = 1)+
-  xlab("Distance to Water (cm)")+
-  ylab("Relative probability")+
-  ylim(-0.8, 0.6)+
-  xlim(0,1000)+
-  theme_bw()
-
-#Depth
-
-x<-cbind(x$x,x$y)
-x<-data.frame(x)
-names(x)<-c("x","y")
-
-x1<-ggplot(data = x, aes(x,y))+
-  geom_line(size = 1)+
-  xlab("Water Depth (cm)")+
-  ylab("Relative probability")+
-  theme_bw()
-
-y<-cbind(y$x,y$y)
-y<-data.frame(y)
-names(y)<-c("x","y")
-
-y1<-ggplot(data = y, aes(x,y))+
-  geom_line(size = 1)+
-  xlab("Canopy Closure (%)")+
-  ylab("Relative probability")+
-  theme_bw()
-
-#Z. Bares Soil
-z<-cbind(z$x,z$y)
-z<-data.frame(z)
-names(z)<-c("x","y")
-
-z1<-ggplot(data = z, aes(x,y))+
-  geom_line(size = 1)+
-  xlab("Bare Soil Cover (%)")+
-  ylab("Relative probability")+
-  theme_bw()
-```
-
-```{r Variable importance Plot, fig.width=8}
-G+
   theme_bw(base_size = 12)
 ```
 
-**Figure 3:** The Relative Importance (based on the Mean decrease in Gini) on the environmental variables from the Maximum Random Forest model on Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
+```{r Partial Dependence Plots}
+#RF a8
+plot1<-partial(a8, pred.var = "Dist..To.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-```{r Partial Dependance Plots, message=FALSE, warning=FALSE}
-grid.arrange(w1,x1,z1,y1, ncol= 2)+
-  theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))
+plot2<-partial(a8, pred.var = "X.Bare.soil", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot_grid(w1, x1,z1,y1, labels=c("A)", "B)", "C)","D)"), ncol = 2, nrow = 2)
+plot3<-partial(a8, pred.var = "Rock.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+
+plot4<-partial(a8, pred.var = "Depth", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+
+#GGPLOT
+
+plot1<-plot1+geom_line(size = 1.5)+
+  xlab("Distance to Water (cm)")+
+  ylab("Relative probability")+
+  ylim(-0.8, 0.5)+
+  xlim(0,1001)+
+  theme_bw(base_size = 12)
+
+plot2<-plot2+ geom_line(size = 1.5)+
+  xlab("Bare soil cover (%)")+
+  ylab("Relative probability")+
+  xlim(0,100)+
+  theme_bw(base_size = 12)
+
+plot3<-plot3+ geom_line(size = 1.5)+
+  xlab("Rock cover (%)")+
+  ylab("Relative probability")+
+  xlim(0,100)+
+  ylim(-1,0)+
+  theme_bw(base_size = 12)
+
+plot4<-plot4+ geom_line(size = 1.5)+
+  xlab("Water Depth (cm)")+
+  ylab("Relative probability")+
+  xlim(0,100)+
+  theme_bw(base_size = 12)
 ```
 
-**Figure 4:** Partial dependance plots of the four most constributing variables (From mean decrease in gini) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Water depth (A), distance to water (B), canopy closure (C), and  percent bare soil (D) were measured within and above a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
+```{r Variable importance Plot, fig.width=8}
+G
+```
+
+**Figure 3:** The Relative Importance (based on the Mean Decrease Accuracy) on the environmental variables from the minimum error rate random forest model on Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
+
+```{r Partial Dependance Plots, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+plot_grid(plot1, plot2,plot3,plot4, labels=c("A ", "B ", "C ","D "), ncol = 2, nrow = 2)
+```
+
+**Figure 4:** Partial dependance plots of the four most constributing variables (From mean decrease accuracy) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Distance to water (A), bare soil cover (B), rock cover (C), and water depth (D) were measured within and above a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
 
 # **Discussion**
 
