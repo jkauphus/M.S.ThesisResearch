@@ -465,15 +465,145 @@ Prior to developing the Random Forest models, we used a tested multicollinearity
 
 Our maximum-accuracy RF model identified that distance to water (cm), water depth (cm), percent bare soil (%), and percent water (%) were the most important predictors in identifying the occurrence of a cottonmouth within an area. The medium importance environmental variables were canopy closure (%), distance to a cover object (%), and percent floating vegetation (%). To clarify, the important predictor variables validate cottonmouths strong association to swamp habitat. Partial dependence found that the probability of occurrence of a cottonmouth was negatively related to site distance from a water source (Fig 4A). Response to water depth sharply increased from 0 – 20 cm and then decreased in occurrence as depth increased past 25 cm (Fig 4B). Response to water cover increased in occurrence and then plateaued past 10% cover and the response to bare soil cover increased up to 30% and then slightly declined in cottonmouth occurrence (Fig 4 C & D).
 
-```{r Feature Selection, message=FALSE, warning=FALSE, include=FALSE}
+```{r Feature Selection by MIR, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 rf<-s1[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,22)]
 set.seed(111)
-#Model Improvement Metric
-RF<-randomForest(Type~.,rf, ntree= 10000)
+#Model Improvement Ratio by Cutler et al. 2010
+#Train & Test
+set.seed(123)
+ind<-sample(2,nrow(rf),replace = T, prob = c(0.75,0.25))
+train<-rf[ind==1,]
+test<-rf[ind==2,]
 
-boruta<-Boruta(Type~., rf, doTrace = 2, maxRuns = 500)
-plot(boruta, las = 2, cex.axis = 0.7)
+#Random Forest
+RF<-randomForest(Type~.,train, ntree= 6000, importance= T)
+RF
+
+#OOB = 16.12; class = 0.151/0.1727
+
+# MIR > 0
+A<-data.frame(randomForest::importance(RF))
+A
+A<-data.frame(A[,2])
+sum<-sum(A)
+A<-A/sum
+A
+#Remove 8 Cover Height
+
+#MIR > 0.02
+rf<-s[,c(1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,19)]
+
+#Train & Test
+set.seed(123)
+ind<-sample(2,nrow(rf),replace = T, prob = c(0.75,0.25))
+train<-rf[ind==1,]
+test<-rf[ind==2,]
+
+#Random Forest
+RF<-randomForest(Type~.,train, ntree= 6000, importance= T)
+RF
+
+#OOB = 16.94, class= 0.151/0.190
+A<-data.frame(randomForest::importance(RF))
+A
+A<-data.frame(A[,2])
+sum<-sum(A)
+A<-A/sum
+A
+# Remove Canopy Cover 1
+
+#MIR > 0.04
+
+rf<-s[,c(1,3,4,5,6,7,9,10,11,12,13,14,15,16,19)]
+
+set.seed(123)
+ind<-sample(2,nrow(rf),replace = T, prob = c(0.75,0.25))
+train<-rf[ind==1,]
+test<-rf[ind==2,]
+
+#Random Forest
+RF<-randomForest(Type~.,train, ntree= 6000, importance= T)
+RF
+
+#OOB = 17.36, class= 0.151/0.20
+A<-data.frame(randomForest::importance(RF))
+A
+A<-data.frame(A[,2])
+sum<-sum(A)
+A<-A/sum
+A
+
+#Remove 5 WSH, 6 dist, 7 log diam, 12 floating veg
+
+#MIR > 0.06
+rf<-s[,c(1,3,4,5,6,11,12,13,14,16,19)]
+
+set.seed(123)
+ind<-sample(2,nrow(rf),replace = T, prob = c(0.75,0.25))
+train<-rf[ind==1,]
+test<-rf[ind==2,]
+
+#Random Forest
+RF<-randomForest(Type~.,train, ntree= 6000, importance= T)
+RF
+
+#OOB = 18.18, class= 0.189/0.172
+A<-data.frame(randomForest::importance(RF))
+A
+A<-data.frame(A[,2])
+sum<-sum(A)
+A<-A/sum
+A
+# Remove Veg, Depth, & Woody Debris
+
+#MIR > 0.08
+rf<-s[,c(1,3,5,6,11,13,16,19)]
+
+set.seed(123)
+ind<-sample(2,nrow(rf),replace = T, prob = c(0.75,0.25))
+train<-rf[ind==1,]
+test<-rf[ind==2,]
+
+#Random Forest
+RF<-randomForest(Type~.,train, ntree= 6000, importance= T)
+RF
+
+#OOB = 21.07, class= 0.181/0.245
+A<-data.frame(randomForest::importance(RF))
+A
+A<-data.frame(A[,2])
+sum<-sum(A)
+A<-A/sum
+A
+
+#Removed Veg, and Fallen Log Cover
+
+#MIR = 0.1
+rf<-s[,c(1,3,11,13,16,19)]
+
+set.seed(123)
+ind<-sample(2,nrow(rf),replace = T, prob = c(0.75,0.25))
+train<-rf[ind==1,]
+test<-rf[ind==2,]
+
+#Random Forest
+RF<-randomForest(Type~.,train, ntree= 6000, importance= T)
+RF
+
+#OOB = 22.31, class= 0.242/0.20
+A<-data.frame(randomForest::importance(RF))
+A
+A<-data.frame(A[,2])
+sum<-sum(A)
+A<-A/sum
+A
 ```
+
+```{r}
+#Went with the Full Model
+rf<-s1[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,22)]
+```
+
 
 ```{r 10-fold cross validation}
 #Setting up Cross Validation Training and Validation sets
@@ -528,6 +658,7 @@ OOB1<-c(a1$err.rate[6000,1],a2$err.rate[6000,1],a3$err.rate[6000,1],a4$err.rate[
        b3$err.rate[6000,1],b4$err.rate[6000,1],b5$err.rate[6000,1],b6$err.rate[6000,1],b7$err.rate[6000,1],b8$err.rate[6000,1],
        b9$err.rate[6000,1],b10$err.rate[6000,1],c1$err.rate[6000,1],c2$err.rate[6000,1],c3$err.rate[6000,1],c4$err.rate[6000,1],
        c5$err.rate[6000,1],c6$err.rate[6000,1],c7$err.rate[6000,1],c8$err.rate[6000,1],c9$err.rate[6000,1],c10$err.rate[6000,1])
+
 OOB<-c(1-min(OOB1),1-mean(OOB1), 1-max(OOB1))
 ```
 
@@ -599,8 +730,9 @@ gt(models)%>%
 ```{r Variable Importance}
 MDA<-randomForest::importance(a8, class = "SNAKE")
 MDA<-data.frame(MDA[,2])
+
 #Calculating relative importance of MDA
-MDA<-(MDA/63.83)*100
+MDA<-(MDA/63.8366646)*100
 
 #Plotting
 Habitat_Variables <- c("Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover","Fallen Log Cover","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter","Distance To Water", "Water Depth", "Percent Water", "Percent Woody Debris", "Percent Floating Vegetation", "Percent Bare Soil", "Mean Temperature")
