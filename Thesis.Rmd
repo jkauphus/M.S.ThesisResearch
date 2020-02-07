@@ -658,7 +658,6 @@ OOB1<-c(a1$err.rate[6000,1],a2$err.rate[6000,1],a3$err.rate[6000,1],a4$err.rate[
        b3$err.rate[6000,1],b4$err.rate[6000,1],b5$err.rate[6000,1],b6$err.rate[6000,1],b7$err.rate[6000,1],b8$err.rate[6000,1],
        b9$err.rate[6000,1],b10$err.rate[6000,1],c1$err.rate[6000,1],c2$err.rate[6000,1],c3$err.rate[6000,1],c4$err.rate[6000,1],
        c5$err.rate[6000,1],c6$err.rate[6000,1],c7$err.rate[6000,1],c8$err.rate[6000,1],c9$err.rate[6000,1],c10$err.rate[6000,1])
-
 OOB<-c(1-min(OOB1),1-mean(OOB1), 1-max(OOB1))
 ```
 
@@ -727,25 +726,38 @@ gt(models)%>%
     source_note = "AUC = Area Under the Curve")
 ```
 
+```{r Maximum RF Model}
+a8 # Maximum Accuracy
+a6 #Mean Accuracy
+```
+
+
 ```{r Variable Importance}
 MDA<-randomForest::importance(a8, class = "SNAKE")
-MDA<-data.frame(MDA[,2])
-
+MDA<-data.frame(MDA[,c(1,2)])
+gen<-sum(MDA[,1])
+sna<-sum(MDA[,2])
 #Calculating relative importance of MDA
-MDA<-(MDA/63.8366646)*100
+MDA[,1]<-(MDA[,1]/gen)*100
+MDA[,2]<-(MDA[,2]/gen)*100
 
 #Plotting
 Habitat_Variables <- c("Canopy Closure", "Rock Cover", "Leaf Cover", "Vegetative Cover","Fallen Log Cover","Woody Stem Height", "Cover Height", "Distance To Cover","Log Diameter","Distance To Water", "Water Depth", "Percent Water", "Percent Woody Debris", "Percent Floating Vegetation", "Percent Bare Soil", "Mean Temperature")
 
 D<-cbind(Habitat_Variables,MDA)
+row.names(D)<-NULL
 
-G<-ggplot(D, aes( x = reorder(Habitat_Variables, D$MDA...2.), y=D$MDA...2.), color = "black")+
-  geom_col(width = .4, fill = "black")+
-  ylim(0,101)+
-  coord_flip()+
+library(ggpubr)
+
+Q=ggplot(D, aes(x = reorder(Habitat_Variables, D$SNAKE), y = D$SNAKE))+
+  geom_col(aes(fill=D$SNAKE), width = 0.9)+
+  geom_text(label=round(D$SNAKE,1), nudge_y = 0.5)+
+    ylab("Relative Importance")+
   xlab("Environmental Variables")+
-  ylab("Relative Importance (%)")+
-  theme_bw(base_size = 12)
+  coord_flip()+
+  theme_classic()+ theme(legend.position = "none")
+
+Q<-Q+scale_fill_gradient2(low="green", high="red")
 ```
 
 ```{r Partial Dependence Plots}
@@ -758,6 +770,10 @@ plot3<-partial(a8, pred.var = "Rock.Cover", pdp = T, center = T, plot = T, plot.
 
 plot4<-partial(a8, pred.var = "Depth", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
+plot5<-partial(a8, pred.var = "X.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+
+plot6<-partial(a8, pred.var = "Dist..To.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+
 #GGPLOT
 
 plot1<-plot1+geom_line(size = 1.5)+
@@ -765,36 +781,47 @@ plot1<-plot1+geom_line(size = 1.5)+
   ylab("Relative probability")+
   ylim(-0.8, 0.5)+
   xlim(0,1001)+
-  theme_bw(base_size = 12)
+  theme_light(base_size = 12)
 
 plot2<-plot2+ geom_line(size = 1.5)+
   xlab("Bare soil cover (%)")+
   ylab("Relative probability")+
   xlim(0,100)+
-  theme_bw(base_size = 12)
+  theme_light(base_size = 12)
 
 plot3<-plot3+ geom_line(size = 1.5)+
   xlab("Rock cover (%)")+
   ylab("Relative probability")+
   xlim(0,100)+
   ylim(-1,0)+
-  theme_bw(base_size = 12)
+  theme_light(base_size = 12)
 
 plot4<-plot4+ geom_line(size = 1.5)+
   xlab("Water Depth (cm)")+
   ylab("Relative probability")+
   xlim(0,100)+
-  theme_bw(base_size = 12)
+  theme_light(base_size = 12)
+
+plot5<-plot5+ geom_line(size = 1.5)+
+  xlab("Water Cover (%)")+
+  ylab("Relative probability")+
+  xlim(0,100)+
+  theme_light(base_size = 12)
+
+plot6<-plot6+ geom_line(size = 1.5)+
+  xlab("Distance to Cover (cm)")+
+  ylab("Relative probability")+
+  theme_light(base_size = 12)
 ```
 
 ```{r Variable importance Plot, fig.width=8}
-G
+Q
 ```
 
 **Figure 3:** The Relative Importance (based on the Mean Decrease Accuracy) on the environmental variables from the minimum error rate random forest model on Cottonmouth (Agkistrodon piscivorus) habitat selection in Middle TN, USA. Cover variables were measured in percentage of occurance within a 1-m^2 quadrat, and all other metrics were measured in cm.
 
 ```{r Partial Dependance Plots, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
-plot_grid(plot1, plot2,plot3,plot4, labels=c("A ", "B ", "C ","D "), ncol = 2, nrow = 2)
+plot_grid(plot1, plot2,plot3,plot4,plot5,plot6, labels=c("A ", "B ", "C ","D ", "E ", "F "), ncol = 2, nrow = 3)
 ```
 
 **Figure 4:** Partial dependance plots of the four most constributing variables (From mean decrease accuracy) with relative probability of cottonmouth habitat selection of a site within Middle Tennessee, USA. Distance to water (A), bare soil cover (B), rock cover (C), and water depth (D) were measured within and above a 1-m^2 quadrat from were a cottonmouth was located during visual encounter.
