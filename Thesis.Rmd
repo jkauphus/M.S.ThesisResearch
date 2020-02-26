@@ -750,7 +750,7 @@ row.names(D)<-NULL
 library(ggpubr)
 
 Q=ggplot(D, aes(x = reorder(Habitat_Variables, D$SNAKE), y = D$SNAKE))+
-  geom_col(aes(fill=D$SNAKE), width = 0.9)+
+  geom_col(aes(fill=D$SNAKE), color = "black", width = 0.9)+
   geom_text(label=round(D$SNAKE,1), nudge_y = 0.5)+
     ylab("Relative Importance")+
   xlab("Environmental Variables")+
