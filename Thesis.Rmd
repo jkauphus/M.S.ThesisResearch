@@ -23,7 +23,7 @@ output:
 ```{r Library, include=FALSE}
 packages<-c("adehabitatHR","ggmap","dismo","rgbif","rdryad","utils","readxl","ggridges","viridis","rasterVis","maps","mapdata","raster",
 "rasterImage", "data.table","ggfortify","grid","move","moveVis","OpenStreetMap","pbapply","plotly",
-"rgdal","sp","tidyverse", "dplyr", "ggplot2", "factoextra", "FactoMineR", "tidyr", "knitr", "gridExtra", "lattice", "permute", "vegan", "RVAideMemoire", "MASS", "caret", "tmap", "tmaptools", "ggsn", "leaflet", "sf", "sp", "ggmap", "randomForest", "randomForestExplainer", "rfUtilities", "faraway", "ROCR", "formattable", "kableExtra", "cowplot", "ggforce", "ggrepel", "ggExtra", "gt", "glue", "Boruta", "pdp", "ggpubr", "scales")
+"rgdal","sp","tidyverse", "dplyr", "ggplot2", "factoextra", "FactoMineR", "tidyr", "knitr", "gridExtra", "lattice", "permute", "vegan", "RVAideMemoire", "MASS", "caret", "tmap", "tmaptools", "ggsn", "leaflet", "sf", "sp", "ggmap", "randomForest", "randomForestExplainer", "rfUtilities", "faraway", "ROCR", "formattable", "kableExtra", "cowplot", "ggforce", "ggrepel", "ggExtra", "gt", "glue", "Boruta", "pdp", "ggpubr", "scales", "rinat")
 sapply(packages, require, character.only=T)
 ```
 
@@ -52,11 +52,13 @@ extent <- extent(-94,-78,25,40)
 
 # DISMO and GBIF 
 
-agk_dismo <- gbif("agkistrodon", species = "piscivorus", ext = extent,
-             geo = TRUE, sp = TRUE, download = TRUE,
-             removeZeros = TRUE)
+#agk_dismo <- gbif("agkistrodon", species = "piscivorus", ext = extent, geo = TRUE, sp = TRUE, download = TRUE, removeZeros = TRUE)
 
-agk_xy <- as.data.frame(cbind(agk_dismo@coords[,1],agk_dismo@coords[,2]))
+agk_dismo <- get_inat_obs(query = "Agkistrodon piscivorus")
+
+#agk_xy <- as.data.frame(cbind(agk_dismo@coords[,1],agk_dismo@coords[,2]))
+
+agk_xy<- as.data.frame(cbind(agk_dismo$longitude, agk_dismo$latitude))
 colnames(agk_xy) <- c("longitude","latitude")
 
 agk_xy<-cbind(agk_xy, data.frame("Species" = "Cottonmouth"))
@@ -173,7 +175,8 @@ p2<-p2+scale_x_date(breaks=date_breaks("6 months"), labels = date_format("%b %y"
 
 plot_grid(p1,p2, ncol = 1, nrow = 2)
 ```
-**Hydrograph** Above graph depicts the gauge height of the  Cumberland River below the Cheatham Dam, TN. Data was taken at (COORDINATES), and can be found on the USGS Water Resources Website
+
+**Figure 1** Hydrographs of the annual hydrology of the Cumberland River below the Cheatham Dam, TN (above) recorded at 36°19'22.26" N & 87°13'41.73" W, and the Sycamore Creek Near Ashland City, TN (below) recorded at 36°19'11.89" N, & 87°03'04.29"W. Both waterways flow into and were recorded within 8 km from the study site near the Cumberland River Bicentennial Trial. Information was provided by the USGS National Water Information System (https://waterdata.usgs.gov/nwis).
 
 
 ## Field Collection 
@@ -286,7 +289,6 @@ s1<-s[,c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22)]
 
 #PCA
 pc<-princomp(s1[,c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,22)], cor = T, scores = T)
-
 #Component
 #Setting- Up ANOVA
 comp<-pc$scores[,1:3]
@@ -303,7 +305,7 @@ pcomp<-group_by(group, Group)%>%
 #Plot Type
 gg_scatter1<-ggplot(data = s1, aes(Comp.1, Comp.2, color = Type))+
   geom_point(size = 3.1)+
-  scale_color_manual(values = c("hotpink3","black","palegreen4","navyblue", "tomato2","grey44"))+
+  scale_color_manual(values = c("#F8766D","black","#7CAE00","#00BFC4", "#C77CFF","grey44"))+
   theme_bw(base_size = 24)+
   theme(panel.grid = element_blank(), panel.border = element_rect(fill= "transparent"))+
   geom_hline(yintercept = 0, lty = 2) +
@@ -322,10 +324,10 @@ gg_scatter1<-ggplot(data = s1, aes(Comp.1, Comp.2, color = Type))+
 
 p<-gg_scatter1+ geom_point(data = pcomp, aes(pcomp$Comp.1, pcomp$Comp.2, shape = Group, color =Group), size = 7, alpha= 0.8)+
   scale_shape_manual(values = c(15,16,17,18))+
-  annotate("label", x = 0.41, y = 0.41, label = "FEMALE", color ="hotpink3")+
-  annotate("label", x = -1.1, y = 1.2, label = "JUVENILE", color ="palegreen4")+
-  annotate("label", x = -0.5, y = -0.1, label = "MALE", color ="navyblue")+
-  annotate("label", x = 0.15, y = 1.65, label = "NEONATE", color ="tomato2")
+  annotate("label", x = 0.41, y = 0.41, label = "FEMALE", color ="#F8766D")+
+  annotate("label", x = -1.1, y = 1.2, label = "JUVENILE", color ="#7CAE00")+
+  annotate("label", x = -0.5, y = -0.1, label = "MALE", color ="#00BFC4")+
+  annotate("label", x = 0.15, y = 1.65, label = "NEONATE", color ="#C77CFF")
 ```
 **Table 1:** Factor loadings from principal component analysis of environmental variables measured for cottonmouths and general habitat comparitsion sites
 
@@ -361,11 +363,11 @@ gt(loadings, rownames_to_stub = TRUE, )%>%
 ```{r CowPLot, echo=TRUE, fig.height=8, fig.width=12, message=FALSE, warning=FALSE}
 xdens<-axis_canvas(p, axis = "x")+
 geom_density(data =group, aes(Comp.1, fill = group$Group), alpha = 0.3, size =1)+
-scale_fill_manual(values = c("hotpink3","palegreen4","navyblue", "tomato2"))
+scale_fill_manual(values = c("#F8766D","#7CAE00","#00BFC4", "#C77CFF"))
 
 ydens<-axis_canvas(p, axis = "y", coord_flip = TRUE)+
 geom_density(data =group, aes(Comp.2, fill = group$Group), alpha = 0.3, size =1)+
-  scale_fill_manual(values = c("hotpink3","palegreen4","navyblue", "tomato2"))+
+  scale_fill_manual(values = c("#F8766D","#7CAE00","#00BFC4", "#C77CFF"))+
   coord_flip()
 
 p1<-insert_xaxis_grob(p, xdens, grid::unit(0.2, "null"), position= "top")
@@ -374,7 +376,7 @@ p2<-insert_yaxis_grob(p1,ydens, grid::unit(0.2, "null"), position = "right")
 ggdraw(p2)
 ```
 
-**Figure 1:** Principal component analysis of the environmental variables measured for the *A. piscivorus* (cottonmouth) and general available habitat selected comparison sites. Ellipses represent 95% condifence intervals for cottonmouths (grey) and general habitat (black). Mean principal component scores of the intra-specific cottonmouth groups (adult males, adult females, juveniles,  & young of the year [YOY]) plotted. Positive values for PC-1 indicate non-flooded areas with a greater distance from flooded areas, and positive PC-2 values indicate areas with higher thermal sites. Density counts for the cottonmouth conspecifics represented for each PC score, with PC-1 cottonmouth group density above the plot, and PC-2 cottonmouth group density toward the right of the plot.
+**Figure 2:** Principal component analysis of the environmental variables measured for A. piscivorus (cottonmouth) and the available habitat comparison sites. Ellipses represent 95% confidence intervals for cottonmouth (grey) and available habitat (black). Mean principal component scores of the intra-specific cottonmouth conspecifics; adult males (blue), adult females (red), juveniles (green), and neonates (purple). Density counts of the cottonmouth conspecifics represented for each PC score, with PC-1 cottonmouth conspecific density above the plot, and PC-2 cottonmouth conspecific density toward the right of the plot.
 
 **Table 2:** Results of the multivariate statistal tests PERMANOVA/PERMDISP based on the Euclidean distance comparing cottonmouth habitat selected and general habitat available to the cottonmouth within the study area.
 ```{r PERMANOVA/PERMDISP Table, fig.height=4, fig.width=8, message=FALSE, warning=FALSE}
@@ -673,7 +675,7 @@ test<-rf[ind==2,]
 ```
 
 ```{r 30 iterations, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
-set.seed(111)
+set.seed(123)
 a1<- randomForest(Type~., data = train, ntree = 6000, importance = T)
 a2<- randomForest(Type~., data = train, ntree = 6000, importance = T)
 a3<- randomForest(Type~., data = train, ntree = 6000, importance = T)
@@ -718,6 +720,7 @@ OOB1<-c(a1$err.rate[6000,1],a2$err.rate[6000,1],a3$err.rate[6000,1],a4$err.rate[
        b9$err.rate[6000,1],b10$err.rate[6000,1],c1$err.rate[6000,1],c2$err.rate[6000,1],c3$err.rate[6000,1],c4$err.rate[6000,1],
        c5$err.rate[6000,1],c6$err.rate[6000,1],c7$err.rate[6000,1],c8$err.rate[6000,1],c9$err.rate[6000,1],c10$err.rate[6000,1])
 OOB<-c(1-min(OOB1),1-mean(OOB1), 1-max(OOB1))
+OOB1
 ```
 
 ```{r Cross-Validation}
@@ -786,13 +789,13 @@ gt(models)%>%
 ```
 
 ```{r Maximum RF Model}
-c9 # Maximum Accuracy
-a3 #Mean Accuracy
+a7 # Maximum Accuracy
+a1 #Mean Accuracy
 ```
 
 
 ```{r Variable Importance}
-MDA<-randomForest::importance(c9, class = "SNAKE")
+MDA<-randomForest::importance(a7, class = "SNAKE")
 MDA<-data.frame(MDA[,c(1,2)])
 gen<-sum(MDA[,1])
 sna<-sum(MDA[,2])
@@ -818,18 +821,18 @@ Q<-Q+scale_fill_gradient2(low="white", high="black")
 ```
 
 ```{r Partial Dependence Plots}
-#RF a8
-plot1<-partial(c9, pred.var = "Dist..To.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+#RF a7
+plot1<-partial(a7, pred.var = "Dist..To.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot2<-partial(c9, pred.var = "X.Bare.soil", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plot2<-partial(a7, pred.var = "X.Bare.soil", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot3<-partial(c9, pred.var = "Rock.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plot3<-partial(a7, pred.var = "Rock.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot4<-partial(c9, pred.var = "Depth", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plot4<-partial(a7, pred.var = "Depth", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot5<-partial(c9, pred.var = "X.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plot5<-partial(a7, pred.var = "X.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot6<-partial(c9, pred.var = "Dist..To.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plot6<-partial(a7, pred.var = "Dist..To.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
 #GGPLOT
 
@@ -842,14 +845,11 @@ plot1<-plot2+ geom_line(size = 1.5)+
 plot2<-plot1+geom_line(size = 1.5)+
   xlab("Distance to Water (cm)")+
   ylab("")+
-  ylim(-0.8, 0.5)+
   theme_light(base_size = 12)
 
 plot3<-plot3+ geom_line(size = 1.5)+
   xlab("Rock cover (%)")+
   ylab("")+
-  xlim(0,105)+
-  ylim(-1,0)+
   theme_light(base_size = 12)
 
 plot4<-plot4+ geom_line(size = 1.5)+
