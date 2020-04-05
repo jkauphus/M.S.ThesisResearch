@@ -52,13 +52,13 @@ extent <- extent(-94,-78,25,40)
 
 # DISMO and GBIF 
 
-#agk_dismo <- gbif("agkistrodon", species = "piscivorus", ext = extent, geo = TRUE, sp = TRUE, download = TRUE, removeZeros = TRUE)
+agk_dismo <- gbif("agkistrodon", species = "piscivorus", ext = extent, geo = TRUE, sp = TRUE, download = TRUE, removeZeros = TRUE)
 
-agk_dismo <- get_inat_obs(query = "Agkistrodon piscivorus")
+#agk_dismo <- get_inat_obs(query = "Agkistrodon piscivorus")
 
-#agk_xy <- as.data.frame(cbind(agk_dismo@coords[,1],agk_dismo@coords[,2]))
+agk_xy <- as.data.frame(cbind(agk_dismo@coords[,1],agk_dismo@coords[,2]))
 
-agk_xy<- as.data.frame(cbind(agk_dismo$longitude, agk_dismo$latitude))
+#agk_xy<- as.data.frame(cbind(agk_dismo$longitude, agk_dismo$latitude))
 colnames(agk_xy) <- c("longitude","latitude")
 
 agk_xy<-cbind(agk_xy, data.frame("Species" = "Cottonmouth"))
@@ -822,51 +822,54 @@ Q<-Q+scale_fill_gradient2(low="white", high="black")
 
 ```{r Partial Dependence Plots}
 #RF a7
-plot1<-partial(a7, pred.var = "Dist..To.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plotx<-partial(a7, pred.var = "Dist..To.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot2<-partial(a7, pred.var = "X.Bare.soil", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+ploty<-partial(a7, pred.var = "X.Bare.soil", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot3<-partial(a7, pred.var = "Rock.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plotz<-partial(a7, pred.var = "Rock.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot4<-partial(a7, pred.var = "Depth", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plotz1<-partial(a7, pred.var = "Depth", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot5<-partial(a7, pred.var = "X.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plotz2<-partial(a7, pred.var = "X.Water", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
-plot6<-partial(a7, pred.var = "Dist..To.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
+plotz3<-partial(a7, pred.var = "Dist..To.Cover", pdp = T, center = T, plot = T, plot.engine = "ggplot2", type = "classification", which.class = "SNAKE", train = train, rug = T)
 
 #GGPLOT
 
-plot1<-plot2+ geom_line(size = 1.5)+
+plot1<-ploty+ geom_line(size = 1.5)+
   xlab("Bare soil cover (%)")+
   ylab("Relative probability")+
   xlim(0,105)+
   theme_light(base_size = 12)
 
-plot2<-plot1+geom_line(size = 1.5)+
+plot2<-plotx+geom_line(size = 1.5)+
   xlab("Distance to Water (cm)")+
   ylab("")+
+  ylim(-1.05,0.35)+
   theme_light(base_size = 12)
 
-plot3<-plot3+ geom_line(size = 1.5)+
+plot3<-plotz+ geom_line(size = 1.5)+
   xlab("Rock cover (%)")+
   ylab("")+
   theme_light(base_size = 12)
 
-plot4<-plot4+ geom_line(size = 1.5)+
+plot4<-plotz1+ geom_line(size = 1.5)+
   xlab("Water Depth (cm)")+
   ylab("Relative probability")+
   xlim(0,105)+
   theme_light(base_size = 12)
 
-plot5<-plot5+ geom_line(size = 1.5)+
+plot5<-plotz2+ geom_line(size = 1.5)+
   xlab("Water Cover (%)")+
   ylab("")+
   xlim(0,105)+
+  ylim(-0.80, 0.25)+
   theme_light(base_size = 12)
 
-plot6<-plot6+ geom_line(size = 1.5)+
+plot6<-plotz3+ geom_line(size = 1.5)+
   xlab("Distance to Cover (cm)")+
   ylab("")+
+  ylim(-0.65,-0.2)+
   theme_light(base_size = 12)
 ```
 
